@@ -1,0 +1,35 @@
+<h2>Customer Leads</h2>
+
+<div id="leadList"></div>
+
+<script>
+
+async function loadLeads(){
+
+const {data}=await client.from("leads").select("*")
+
+let html=""
+
+data.forEach(l=>{
+
+html+=`
+<div>
+
+${l.name}
+
+${l.phone}
+
+${l.destination}
+
+</div>
+`
+
+})
+
+leadList.innerHTML=html
+
+}
+
+loadLeads()
+
+</script>
