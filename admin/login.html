@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Skyroute CMS</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+</head>
+
+<body>
+
+<h2>Admin Login</h2>
+
+<input id="email" placeholder="Email">
+
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<script>
+
+const client=supabase.createClient(
+"SUPABASE_URL",
+"SUPABASE_PUBLIC_KEY"
+)
+
+async function login(){
+
+const {data,error}=await client.auth.signInWithPassword({
+
+email:email.value,
+password:password.value
+
+})
+
+if(error) alert(error.message)
+
+else window.location="dashboard.html"
+
+}
+
+</script>
+
+</body>
+
+</html>
