@@ -6,7 +6,6 @@
     <title>Admin Login - Sky Route Global</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* (keep your existing styles) */
         * {
             margin: 0;
             padding: 0;
@@ -190,12 +189,14 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpZXJwcmpnZXlwY3N2ZGxvamx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1ODMsImV4cCI6MjA4OTE1NzU4M30.KGz_UBwqWkO8qE4g2mQHy7ktD1ZMFTw2a9uJKuzfjCk';
         
         console.log('Initializing Supabase with URL:', SUPABASE_URL);
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Create supabase client - declare once with const
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
         // Debug: Check connection
         async function checkConnection() {
             try {
-                const { data, error } = await supabase.from('settings').select('count').limit(1);
+                const { data, error } = await supabaseClient.from('settings').select('count').limit(1);
                 if (error) {
                     console.error('Connection test error:', error);
                     document.getElementById('debug-info').style.display = 'block';
@@ -232,7 +233,7 @@
             console.log('Attempting login for:', email);
             
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
@@ -284,7 +285,7 @@
         
         // Check if already logged in
         (async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await supabaseClient.auth.getUser();
             if (user) {
                 console.log('Already logged in as:', user.email);
                 window.location.href = 'dashboard.html';
