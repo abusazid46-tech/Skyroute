@@ -1,35 +1,916 @@
-<h2>Customer Leads</h2>
-
-<div id="leadList"></div>
-
-<script>
-
-async function loadLeads(){
-
-const {data}=await client.from("leads").select("*")
-
-let html=""
-
-data.forEach(l=>{
-
-html+=`
-<div>
-
-${l.name}
-
-${l.phone}
-
-${l.destination}
-
-</div>
-`
-
-})
-
-leadList.innerHTML=html
-
-}
-
-loadLeads()
-
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leads Manager - Sky Route Global Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: #f1f5f9;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar - same as before */
+        .sidebar {
+            width: 260px;
+            background: #0a2540;
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+        }
+        
+        .sidebar-header span {
+            color: #ff6600;
+        }
+        
+        .sidebar-header small {
+            display: block;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item i {
+            width: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255,255,255,0.05);
+            color: white;
+        }
+        
+        .nav-item.active {
+            background: rgba(255,102,0,0.1);
+            color: #ff6600;
+            border-left-color: #ff6600;
+        }
+        
+        .nav-item.logout {
+            margin-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+        }
+        
+        /* Main content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            color: #0a2540;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #ff6600;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #e65c00;
+        }
+        
+        .btn-outline {
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+        }
+        
+        /* Filters */
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 10px 10px 40px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .filter-select {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+        
+        .date-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .date-range input {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        /* Leads table */
+        .leads-table-container {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            overflow-x: auto;
+        }
+        
+        .leads-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+        
+        .leads-table th {
+            background: #f8fafc;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #0a2540;
+            font-size: 0.9rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .leads-table td {
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+        
+        .leads-table tr:hover td {
+            background: #f8fafc;
+        }
+        
+        .leads-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-new {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        
+        .status-contacted {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+        
+        .status-converted {
+            background: #d1fae5;
+            color: #059669;
+        }
+        
+        .status-lost {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 6px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .view-btn {
+            background: #f1f5f9;
+            color: #0a2540;
+        }
+        
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+        }
+        
+        .status-select {
+            padding: 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 20px;
+        }
+        
+        .pagination-btn {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .pagination-btn:hover:not(:disabled) {
+            background: #ff6600;
+            color: white;
+            border-color: #ff6600;
+        }
+        
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-info {
+            color: #64748b;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+        
+        .lead-details {
+            margin-bottom: 20px;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .detail-label {
+            width: 100px;
+            font-weight: 600;
+            color: #0a2540;
+        }
+        
+        .detail-value {
+            flex: 1;
+            color: #334155;
+        }
+        
+        .detail-value a {
+            color: #ff6600;
+            text-decoration: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f1f5f9;
+            border-radius: 50%;
+            border-top-color: #ff6600;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .export-btn {
+            background: #10b981;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar-header h2, .sidebar-header small, .nav-item span {
+                display: none;
+            }
+            
+            .nav-item {
+                justify-content: center;
+                padding: 16px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+                padding: 20px;
+            }
+            
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .date-range {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Sky Route <span>Global</span></h2>
+                <small>Admin Panel</small>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="packages.html" class="nav-item">
+                    <i class="fas fa-box"></i>
+                    <span>Packages</span>
+                </a>
+                <a href="testimonials.html" class="nav-item">
+                    <i class="fas fa-star"></i>
+                    <span>Testimonials</span>
+                </a>
+                <a href="leads.html" class="nav-item active">
+                    <i class="fas fa-users"></i>
+                    <span>Leads</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <i class="fas fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item logout" id="logout-btn">
+                    <i class="fas fa-sign-out"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1>Leads Manager</h1>
+                <div class="header-right">
+                    <button class="btn btn-outline" onclick="exportLeads()">
+                        <i class="fas fa-download"></i> Export CSV
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search by name, phone, destination..." onkeyup="filterLeads()">
+                </div>
+                
+                <select class="filter-select" id="statusFilter" onchange="filterLeads()">
+                    <option value="">All Status</option>
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="converted">Converted</option>
+                    <option value="lost">Lost</option>
+                </select>
+                
+                <select class="filter-select" id="sourceFilter" onchange="filterLeads()">
+                    <option value="">All Sources</option>
+                    <option value="website">Website</option>
+                    <option value="enquire">Enquire</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="callback">Callback</option>
+                </select>
+                
+                <div class="date-range">
+                    <input type="date" id="startDate" onchange="filterLeads()">
+                    <span>to</span>
+                    <input type="date" id="endDate" onchange="filterLeads()">
+                </div>
+            </div>
+            
+            <!-- Leads Table -->
+            <div class="leads-table-container">
+                <table class="leads-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Destination/Package</th>
+                            <th>Source</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px;">
+                                <div class="spinner"></div>
+                                <p style="margin-top: 10px;">Loading leads...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <button class="pagination-btn" id="prevPage" onclick="changePage(-1)" disabled>
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span class="page-info" id="pageInfo">Page 1 of 1</span>
+                <button class="pagination-btn" id="nextPage" onclick="changePage(1)" disabled>
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Lead Details Modal -->
+    <div id="leadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Lead Details</h2>
+                <button class="close-modal" onclick="closeLeadModal()">&times;</button>
+            </div>
+            
+            <div class="lead-details" id="leadDetails">
+                <!-- Details will be populated here -->
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <select id="modalStatus" class="status-select" onchange="updateLeadStatus(this.value)" style="flex: 1;">
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="converted">Converted</option>
+                    <option value="lost">Lost</option>
+                </select>
+                <button class="btn btn-primary" onclick="sendWhatsAppFromModal()">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        const supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+        let allLeads = [];
+        let filteredLeads = [];
+        let currentPage = 1;
+        const itemsPerPage = 20;
+        let currentLeadId = null;
+        
+        // Check authentication
+        (async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            await loadLeads();
+        })();
+        
+        // Load leads
+        async function loadLeads() {
+            try {
+                const { data, error } = await supabase
+                    .from('leads')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                allLeads = data || [];
+                filteredLeads = [...allLeads];
+                renderLeads();
+                
+            } catch (error) {
+                console.error('Error loading leads:', error);
+                document.getElementById('leadsTableBody').innerHTML = 
+                    '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #ef4444;">Error loading leads</td></tr>';
+            }
+        }
+        
+        // Filter leads
+        function filterLeads() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const source = document.getElementById('sourceFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            filteredLeads = allLeads.filter(lead => {
+                // Search filter
+                const matchesSearch = !searchTerm || 
+                    lead.name.toLowerCase().includes(searchTerm) ||
+                    lead.phone.includes(searchTerm) ||
+                    (lead.email && lead.email.toLowerCase().includes(searchTerm)) ||
+                    (lead.destination && lead.destination.toLowerCase().includes(searchTerm)) ||
+                    (lead.package_name && lead.package_name.toLowerCase().includes(searchTerm));
+                
+                // Status filter
+                const matchesStatus = !status || lead.status === status;
+                
+                // Source filter
+                const matchesSource = !source || lead.source === source;
+                
+                // Date filter
+                let matchesDate = true;
+                if (startDate || endDate) {
+                    const leadDate = new Date(lead.created_at).toISOString().split('T')[0];
+                    if (startDate && endDate) {
+                        matchesDate = leadDate >= startDate && leadDate <= endDate;
+                    } else if (startDate) {
+                        matchesDate = leadDate >= startDate;
+                    } else if (endDate) {
+                        matchesDate = leadDate <= endDate;
+                    }
+                }
+                
+                return matchesSearch && matchesStatus && matchesSource && matchesDate;
+            });
+            
+            currentPage = 1;
+            renderLeads();
+        }
+        
+        // Render leads with pagination
+        function renderLeads() {
+            const tbody = document.getElementById('leadsTableBody');
+            const totalPages = Math.ceil(filteredLeads.length / itemsPerPage);
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageLeads = filteredLeads.slice(start, end);
+            
+            if (!filteredLeads.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 60px;">
+                            <i class="fas fa-inbox" style="font-size: 3rem; color: #94a3b8; margin-bottom: 20px;"></i>
+                            <h3 style="color: #0a2540; margin-bottom: 10px;">No Leads Found</h3>
+                            <p style="color: #64748b;">Try adjusting your filters</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                let html = '';
+                pageLeads.forEach(lead => {
+                    const date = new Date(lead.created_at).toLocaleDateString('en-IN');
+                    const statusClass = `status-${lead.status || 'new'}`;
+                    
+                    html += `
+                        <tr>
+                            <td>${date}</td>
+                            <td>${lead.name}</td>
+                            <td><a href="tel:${lead.phone}">${lead.phone}</a></td>
+                            <td>${lead.email || '-'}</td>
+                            <td>${lead.destination || lead.package_name || '-'}</td>
+                            <td>${lead.source || 'website'}</td>
+                            <td><span class="status-badge ${statusClass}">${lead.status || 'new'}</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn view-btn" onclick="viewLead('${lead.id}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn whatsapp-btn" onclick="sendWhatsApp('${lead.phone}', '${lead.name}')">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </button>
+                                    <select class="status-select" onchange="updateStatus('${lead.id}', this.value)">
+                                        <option value="new" ${lead.status === 'new' ? 'selected' : ''}>New</option>
+                                        <option value="contacted" ${lead.status === 'contacted' ? 'selected' : ''}>Contacted</option>
+                                        <option value="converted" ${lead.status === 'converted' ? 'selected' : ''}>Converted</option>
+                                        <option value="lost" ${lead.status === 'lost' ? 'selected' : ''}>Lost</option>
+                                    </select>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            }
+            
+            // Update pagination
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages || 1}`;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage === totalPages || totalPages === 0;
+        }
+        
+        // Change page
+        function changePage(direction) {
+            const totalPages = Math.ceil(filteredLeads.length / itemsPerPage);
+            currentPage += direction;
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            renderLeads();
+        }
+        
+        // View lead details
+        async function viewLead(id) {
+            try {
+                const lead = allLeads.find(l => l.id === id);
+                if (!lead) return;
+                
+                currentLeadId = id;
+                
+                const detailsHtml = `
+                    <div class="detail-row">
+                        <div class="detail-label">Name:</div>
+                        <div class="detail-value">${lead.name}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Phone:</div>
+                        <div class="detail-value"><a href="tel:${lead.phone}">${lead.phone}</a></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Email:</div>
+                        <div class="detail-value">${lead.email || '-'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Destination:</div>
+                        <div class="detail-value">${lead.destination || lead.package_name || '-'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Travel Date:</div>
+                        <div class="detail-value">${lead.travel_date ? new Date(lead.travel_date).toLocaleDateString('en-IN') : '-'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Source:</div>
+                        <div class="detail-value">${lead.source || 'website'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Message:</div>
+                        <div class="detail-value">${lead.message || '-'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Created:</div>
+                        <div class="detail-value">${new Date(lead.created_at).toLocaleString('en-IN')}</div>
+                    </div>
+                `;
+                
+                document.getElementById('leadDetails').innerHTML = detailsHtml;
+                document.getElementById('modalStatus').value = lead.status || 'new';
+                document.getElementById('leadModal').classList.add('active');
+                
+            } catch (error) {
+                console.error('Error viewing lead:', error);
+            }
+        }
+        
+        function closeLeadModal() {
+            document.getElementById('leadModal').classList.remove('active');
+            currentLeadId = null;
+        }
+        
+        // Update lead status
+        async function updateStatus(id, status) {
+            try {
+                const { error } = await supabase
+                    .from('leads')
+                    .update({ status })
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                // Update local data
+                const lead = allLeads.find(l => l.id === id);
+                if (lead) lead.status = status;
+                
+                filterLeads(); // Re-render with filters
+                showToast('Status updated successfully');
+                
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Error updating status');
+            }
+        }
+        
+        async function updateLeadStatus(status) {
+            if (!currentLeadId) return;
+            await updateStatus(currentLeadId, status);
+        }
+        
+        // Send WhatsApp
+        function sendWhatsApp(phone, name) {
+            const msg = encodeURIComponent(`Hi ${name}, thanks for your interest in Sky Route Global tours. How can I help you today?`);
+            window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${msg}`, '_blank');
+        }
+        
+        function sendWhatsAppFromModal() {
+            const lead = allLeads.find(l => l.id === currentLeadId);
+            if (lead) {
+                sendWhatsApp(lead.phone, lead.name);
+            }
+        }
+        
+        // Export to CSV
+        function exportLeads() {
+            const headers = ['Date', 'Name', 'Phone', 'Email', 'Destination/Package', 'Source', 'Status', 'Message'];
+            const csvRows = [];
+            
+            // Add headers
+            csvRows.push(headers.join(','));
+            
+            // Add data
+            filteredLeads.forEach(lead => {
+                const row = [
+                    new Date(lead.created_at).toLocaleDateString('en-IN'),
+                    `"${lead.name}"`,
+                    lead.phone,
+                    lead.email || '',
+                    `"${lead.destination || lead.package_name || ''}"`,
+                    lead.source || 'website',
+                    lead.status || 'new',
+                    `"${(lead.message || '').replace(/"/g, '""')}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `leads_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+        
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>
