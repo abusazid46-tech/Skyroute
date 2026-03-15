@@ -6,6 +6,7 @@
     <title>Admin Login - Sky Route Global</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* (keep your existing styles) */
         * {
             margin: 0;
             padding: 0;
@@ -110,16 +111,21 @@
             display: none;
         }
         
+        .debug-info {
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #64748b;
+            display: none;
+        }
+        
         .info {
             text-align: center;
             margin-top: 20px;
             color: #666;
             font-size: 0.9rem;
-        }
-        
-        .info a {
-            color: #ff6600;
-            text-decoration: none;
         }
         
         .spinner {
@@ -148,6 +154,7 @@
         </div>
         
         <div class="error" id="error-message"></div>
+        <div class="debug-info" id="debug-info"></div>
         
         <form id="login-form">
             <div class="form-group">
@@ -169,7 +176,7 @@
         </form>
         
         <div class="info">
-            <p>Demo credentials: admin@skyrouteglobal.in / password123</p>
+            <p>Test credentials: admin@skyrouteglobal.in / password123</p>
             <p style="margin-top: 10px;">
                 <a href="/"><i class="fas fa-arrow-left"></i> Back to website</a>
             </p>
@@ -178,10 +185,29 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // Your Supabase credentials
         const SUPABASE_URL = 'https://pierprjgeypcsvdlojlt.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpZXJwcmpnZXlwY3N2ZGxvamx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1ODMsImV4cCI6MjA4OTE1NzU4M30.KGz_UBwqWkO8qE4g2mQHy7ktD1ZMFTw2a9uJKuzfjCk';
         
+        console.log('Initializing Supabase with URL:', SUPABASE_URL);
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Debug: Check connection
+        async function checkConnection() {
+            try {
+                const { data, error } = await supabase.from('settings').select('count').limit(1);
+                if (error) {
+                    console.error('Connection test error:', error);
+                    document.getElementById('debug-info').style.display = 'block';
+                    document.getElementById('debug-info').innerHTML = `⚠️ Connection test failed: ${error.message}<br>Make sure your Supabase URL and Key are correct.`;
+                } else {
+                    console.log('Connection test successful');
+                }
+            } catch (e) {
+                console.error('Connection test exception:', e);
+            }
+        }
+        checkConnection();
         
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -189,34 +215,64 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const errorEl = document.getElementById('error-message');
+            const debugEl = document.getElementById('debug-info');
             const loginBtn = document.getElementById('login-btn');
             const btnText = document.getElementById('btn-text');
             const btnSpinner = document.getElementById('btn-spinner');
             
-            // Reset error
+            // Reset
             errorEl.style.display = 'none';
+            debugEl.style.display = 'none';
             
             // Show loading
             loginBtn.disabled = true;
             btnText.style.display = 'none';
             btnSpinner.style.display = 'inline-block';
             
+            console.log('Attempting login for:', email);
+            
             try {
                 const { data, error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password
+                    email: email,
+                    password: password
                 });
                 
-                if (error) throw error;
+                console.log('Login response:', { data, error });
                 
-                // Store session
-                localStorage.setItem('admin-session', JSON.stringify(data.session));
+                if (error) {
+                    throw error;
+                }
                 
-                // Redirect to dashboard
-                window.location.href = 'dashboard.html';
+                if (data?.user) {
+                    console.log('Login successful:', data.user);
+                    
+                    // Store session
+                    localStorage.setItem('admin-session', JSON.stringify(data.session));
+                    
+                    // Redirect
+                    window.location.href = 'dashboard.html';
+                } else {
+                    throw new Error('No user data returned');
+                }
                 
             } catch (error) {
-                errorEl.textContent = error.message || 'Invalid email or password';
+                console.error('Login error details:', error);
+                
+                // Show specific error message
+                let errorMessage = error.message || 'Invalid email or password';
+                
+                // Check for specific Supabase errors
+                if (errorMessage.includes('Email not confirmed')) {
+                    errorMessage = 'Please confirm your email address first. Check your inbox.';
+                } else if (errorMessage.includes('Invalid login credentials')) {
+                    errorMessage = 'Invalid email or password. Please check your credentials.';
+                } else if (errorMessage.includes('fetch')) {
+                    errorMessage = 'Network error. Check your internet connection and Supabase URL.';
+                    debugEl.style.display = 'block';
+                    debugEl.innerHTML = `Make sure your Supabase URL is correct: ${SUPABASE_URL}`;
+                }
+                
+                errorEl.textContent = errorMessage;
                 errorEl.style.display = 'block';
                 
                 // Reset button
@@ -230,6 +286,7 @@
         (async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
+                console.log('Already logged in as:', user.email);
                 window.location.href = 'dashboard.html';
             }
         })();
