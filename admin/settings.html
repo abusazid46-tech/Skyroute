@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Sky Route Global Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: #f1f5f9;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar - same as before */
+        .sidebar {
+            width: 260px;
+            background: #0a2540;
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+        }
+        
+        .sidebar-header span {
+            color: #ff6600;
+        }
+        
+        .sidebar-header small {
+            display: block;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item i {
+            width: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255,255,255,0.05);
+            color: white;
+        }
+        
+        .nav-item.active {
+            background: rgba(255,102,0,0.1);
+            color: #ff6600;
+            border-left-color: #ff6600;
+        }
+        
+        .nav-item.logout {
+            margin-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+        }
+        
+        /* Main content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            color: #0a2540;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #ff6600;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #e65c00;
+        }
+        
+        .btn-outline {
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+        }
+        
+        /* Settings tabs */
+        .settings-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            color: #64748b;
+            font-weight: 500;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .tab:hover {
+            color: #ff6600;
+        }
+        
+        .tab.active {
+            color: #ff6600;
+            border-bottom: 3px solid #ff6600;
+        }
+        
+        /* Settings sections */
+        .settings-section {
+            display: none;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        
+        .settings-section.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            color: #0a2540;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #0a2540;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6600;
+            box-shadow: 0 0 0 3px rgba(255,102,0,0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .image-preview {
+            margin-top: 10px;
+            max-width: 200px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f1f5f9;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f1f5f9;
+            border-radius: 50%;
+            border-top-color: #ff6600;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .info-text {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar-header h2, .sidebar-header small, .nav-item span {
+                display: none;
+            }
+            
+            .nav-item {
+                justify-content: center;
+                padding: 16px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+                padding: 20px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Sky Route <span>Global</span></h2>
+                <small>Admin Panel</small>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="packages.html" class="nav-item">
+                    <i class="fas fa-box"></i>
+                    <span>Packages</span>
+                </a>
+                <a href="testimonials.html" class="nav-item">
+                    <i class="fas fa-star"></i>
+                    <span>Testimonials</span>
+                </a>
+                <a href="leads.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Leads</span>
+                </a>
+                <a href="settings.html" class="nav-item active">
+                    <i class="fas fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item logout" id="logout-btn">
+                    <i class="fas fa-sign-out"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1>Website Settings</h1>
+            </div>
+            
+            <!-- Settings Tabs -->
+            <div class="settings-tabs">
+                <div class="tab active" onclick="switchTab('general')">General</div>
+                <div class="tab" onclick="switchTab('contact')">Contact Info</div>
+                <div class="tab" onclick="switchTab('hero')">Hero Section</div>
+                <div class="tab" onclick="switchTab('seo')">SEO</div>
+                <div class="tab" onclick="switchTab('social')">Social Media</div>
+            </div>
+            
+            <!-- General Settings -->
+            <div id="general-section" class="settings-section active">
+                <h3 class="section-title">General Settings</h3>
+                
+                <div class="form-group">
+                    <label>Website Title</label>
+                    <input type="text" id="site_title" placeholder="Sky Route Global">
+                    <div class="info-text">Appears in browser tab</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Trust Badge Text</label>
+                    <input type="text" id="trust_badge_text" placeholder="Trusted by 500+ Travelers">
+                </div>
+                
+                <div class="form-group">
+                    <label>Office Hours</label>
+                    <input type="text" id="office_hours" placeholder="Mon-Sat: 9:00 AM - 7:00 PM">
+                </div>
+                
+                <div class="form-group">
+                    <label>Map Embed URL</label>
+                    <textarea id="map_embed_url" rows="3"></textarea>
+                    <div class="info-text">Google Maps embed iframe src URL</div>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="saveSettings('general')">
+                        <i class="fas fa-save"></i> Save General Settings
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Contact Settings -->
+            <div id="contact-section" class="settings-section">
+                <h3 class="section-title">Contact Information</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" id="phone" placeholder="+91 93953 19499">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>WhatsApp Number</label>
+                        <input type="text" id="whatsapp" placeholder="919395319499">
+                        <div class="info-text">Without + or spaces</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="skyrouteglobal1@gmail.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Office Address</label>
+                    <textarea id="address" rows="2" placeholder="Jalukbari AEC campus, Ghy 13, Assam"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="saveSettings('contact')">
+                        <i class="fas fa-save"></i> Save Contact Settings
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Hero Section Settings -->
+            <div id="hero-section" class="settings-section">
+                <h3 class="section-title">Hero Section</h3>
+                
+                <div class="form-group">
+                    <label>Hero Title</label>
+                    <input type="text" id="hero_title" placeholder="Affordable Domestic & International Tours">
+                </div>
+                
+                <div class="form-group">
+                    <label>Hero Subtitle</label>
+                    <textarea id="hero_subtitle" rows="2" placeholder="Explore India and the World with Sky Route Global"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Hero Image</label>
+                    <input type="file" id="hero_image_upload" accept="image/*" onchange="uploadHeroImage(event)">
+                    <div class="image-preview" id="hero_image_preview">
+                        <img src="" alt="Hero Image" style="display: none;">
+                    </div>
+                    <input type="hidden" id="hero_image">
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="saveSettings('hero')">
+                        <i class="fas fa-save"></i> Save Hero Settings
+                    </button>
+                </div>
+            </div>
+            
+            <!-- SEO Settings -->
+            <div id="seo-section" class="settings-section">
+                <h3 class="section-title">SEO Settings</h3>
+                
+                <div class="form-group">
+                    <label>SEO Title</label>
+                    <input type="text" id="seo_title" placeholder="Sky Route Global – Budget Tours from Northeast India">
+                </div>
+                
+                <div class="form-group">
+                    <label>SEO Description</label>
+                    <textarea id="seo_description" rows="3" placeholder="Affordable domestic & international tour packages from Northeast India..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>SEO Keywords</label>
+                    <input type="text" id="seo_keywords" placeholder="travel agency Assam, budget tours, domestic packages">
+                    <div class="info-text">Comma separated keywords</div>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="saveSettings('seo')">
+                        <i class="fas fa-save"></i> Save SEO Settings
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Social Media Settings -->
+            <div id="social-section" class="settings-section">
+                <h3 class="section-title">Social Media Links</h3>
+                
+                <div class="form-group">
+                    <label>Facebook URL</label>
+                    <input type="url" id="facebook_url" placeholder="https://facebook.com/...">
+                </div>
+                
+                <div class="form-group">
+                    <label>Instagram URL</label>
+                    <input type="url" id="instagram_url" placeholder="https://instagram.com/...">
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="saveSettings('social')">
+                        <i class="fas fa-save"></i> Save Social Settings
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        const supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+        let settings = {};
+        
+        // Check authentication
+        (async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            await loadSettings();
+        })();
+        
+        // Load settings
+        async function loadSettings() {
+            try {
+                const { data, error } = await supabase
+                    .from('settings')
+                    .select('*');
+                
+                if (error) throw error;
+                
+                // Convert to key-value object
+                settings = {};
+                data.forEach(item => {
+                    settings[item.key] = item.value;
+                });
+                
+                // Populate form fields
+                populateSettings();
+                
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                alert('Error loading settings');
+            }
+        }
+        
+        // Populate all form fields
+        function populateSettings() {
+            // General
+            document.getElementById('site_title').value = settings.site_title || 'Sky Route Global';
+            document.getElementById('trust_badge_text').value = settings.trust_badge_text || 'Trusted by 500+ Travelers from worldwide ⭐⭐⭐⭐⭐';
+            document.getElementById('office_hours').value = settings.office_hours || 'Mon-Sat: 9:00 AM - 7:00 PM';
+            document.getElementById('map_embed_url').value = settings.map_embed_url || '';
+            
+            // Contact
+            document.getElementById('phone').value = settings.phone || '+91 93953 19499';
+            document.getElementById('whatsapp').value = settings.whatsapp || '919395319499';
+            document.getElementById('email').value = settings.email || 'skyrouteglobal1@gmail.com';
+            document.getElementById('address').value = settings.address || 'Jalukbari AEC campus, Ghy 13, Assam';
+            
+            // Hero
+            document.getElementById('hero_title').value = settings.hero_title || 'Affordable Domestic & International Tours';
+            document.getElementById('hero_subtitle').value = settings.hero_subtitle || 'Explore India and the World with Sky Route Global – budget friendly since 2017';
+            if (settings.hero_image) {
+                document.getElementById('hero_image_preview').innerHTML = `<img src="${settings.hero_image}" alt="Hero Image">`;
+                document.getElementById('hero_image').value = settings.hero_image;
+            }
+            
+            // SEO
+            document.getElementById('seo_title').value = settings.seo_title || 'Sky Route Global – Budget Tours from Northeast India';
+            document.getElementById('seo_description').value = settings.seo_description || '';
+            document.getElementById('seo_keywords').value = settings.seo_keywords || '';
+            
+            // Social
+            document.getElementById('facebook_url').value = settings.facebook_url || '';
+            document.getElementById('instagram_url').value = settings.instagram_url || '';
+        }
+        
+        // Switch tabs
+        function switchTab(tab) {
+            // Update tab classes
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab[onclick*="${tab}"]`).classList.add('active');
+            
+            // Update sections
+            document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`${tab}-section`).classList.add('active');
+        }
+        
+        // Save settings
+        async function saveSettings(section) {
+            const updates = [];
+            
+            switch(section) {
+                case 'general':
+                    updates.push(
+                        { key: 'site_title', value: document.getElementById('site_title').value },
+                        { key: 'trust_badge_text', value: document.getElementById('trust_badge_text').value },
+                        { key: 'office_hours', value: document.getElementById('office_hours').value },
+                        { key: 'map_embed_url', value: document.getElementById('map_embed_url').value }
+                    );
+                    break;
+                    
+                case 'contact':
+                    updates.push(
+                        { key: 'phone', value: document.getElementById('phone').value },
+                        { key: 'whatsapp', value: document.getElementById('whatsapp').value },
+                        { key: 'email', value: document.getElementById('email').value },
+                        { key: 'address', value: document.getElementById('address').value }
+                    );
+                    break;
+                    
+                case 'hero':
+                    updates.push(
+                        { key: 'hero_title', value: document.getElementById('hero_title').value },
+                        { key: 'hero_subtitle', value: document.getElementById('hero_subtitle').value },
+                        { key: 'hero_image', value: document.getElementById('hero_image').value }
+                    );
+                    break;
+                    
+                case 'seo':
+                    updates.push(
+                        { key: 'seo_title', value: document.getElementById('seo_title').value },
+                        { key: 'seo_description', value: document.getElementById('seo_description').value },
+                        { key: 'seo_keywords', value: document.getElementById('seo_keywords').value }
+                    );
+                    break;
+                    
+                case 'social':
+                    updates.push(
+                        { key: 'facebook_url', value: document.getElementById('facebook_url').value },
+                        { key: 'instagram_url', value: document.getElementById('instagram_url').value }
+                    );
+                    break;
+            }
+            
+            try {
+                // Update each setting
+                for (const update of updates) {
+                    const { error } = await supabase
+                        .from('settings')
+                        .upsert({ key: update.key, value: update.value }, { onConflict: 'key' });
+                    
+                    if (error) throw error;
+                }
+                
+                showToast(`${section} settings saved successfully`);
+                await loadSettings(); // Reload to confirm
+                
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                alert('Error saving settings: ' + error.message);
+            }
+        }
+        
+        // Upload hero image
+        async function uploadHeroImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('hero_image_preview').innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            };
+            reader.readAsDataURL(file);
+            
+            // Upload to Supabase
+            try {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `hero/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                
+                const { data, error } = await supabase.storage
+                    .from('images')
+                    .upload(fileName, file);
+                
+                if (error) throw error;
+                
+                const { data: { publicUrl } } = supabase.storage
+                    .from('images')
+                    .getPublicUrl(fileName);
+                
+                document.getElementById('hero_image').value = publicUrl;
+                
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                alert('Error uploading image. Please try again.');
+            }
+        }
+        
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>
