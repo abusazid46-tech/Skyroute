@@ -1926,7 +1926,6 @@ function openWhatsApp(text) {
         window.whatsappCallback = whatsappCallback;
         window.handleImageError = handleImageError;
         window.sendContactMessage = sendContactMessage;
-    </script>
     <!-- Supabase JS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js"></script>
@@ -1935,78 +1934,260 @@ function openWhatsApp(text) {
 <script src="js/loadPackages.js"></script>
 <script src="js/loadTestimonials.js"></script>
 <script src="js/loadSettings.js"></script>
-    
-// Override the existing loadPackages function with our dynamic version
-async function loadPackages() {
-    const packagesByCategory = await window.loadPackages();
-    if (!packagesByCategory) return;
-    
-    // Render packages for each category based on current page
-    const currentPage = window.location.hash.substring(1) || 'home';
-    
-    if (currentPage === 'domestic' && document.querySelector('.package-grid')) {
-        renderPackages('domestic', '.package-grid');
-    }
-    
-    if (currentPage === 'international' && document.querySelector('.package-grid')) {
-        renderPackages('international', '.package-grid');
-    }
-    
-    if (currentPage === 'honeymoon' && document.querySelector('.romance-grid')) {
-        // For honeymoon, we need to convert package data to romance card format
-        const packages = packagesByCategory.honeymoon || [];
-        const romanceGrid = document.querySelector('.romance-grid');
+
+<script>
+// Make sure all functions are available
+async function loadPackagesFromDB() {
+    try {
+        // Use the supabaseClient from supabase.js
+        const { data, error } = await supabaseClient
+            .from('packages')
+            .select('*')
+            .order('created_at', { ascending: false });
         
-        if (romanceGrid && packages.length) {
-            let html = '';
-            packages.forEach(pkg => {
-                html += `
-                    <div class="romance-card">
-                        <img class="romance-img" src="${pkg.image || 'https://via.placeholder.com/300x200'}" alt="${pkg.name}" loading="lazy" onerror="handleImageError(this)">
-                        <div class="romance-content">
-                            <div class="heart-icon">❤️</div>
-                            <h3>${pkg.name}</h3>
-                            <p>${pkg.description || 'Romantic getaway for couples'}</p>
-                            <div class="price">₹${pkg.price} <small>per couple</small></div>
-                            <a href="#" class="btn" onclick="enquirePackage('${pkg.name}', '${pkg.price}'); return false;"><i class="fab fa-whatsapp"></i> Enquire</a>
-                        </div>
-                    </div>
-                `;
-            });
-            romanceGrid.innerHTML = html;
-        }
+        if (error) throw error;
+        
+        // Group packages by category
+        const packagesByCategory = {
+            domestic: data.filter(p => p.category === 'domestic'),
+            international: data.filter(p => p.category === 'international'),
+            honeymoon: data.filter(p => p.category === 'honeymoon')
+        };
+        
+        return packagesByCategory;
+    } catch (error) {
+        console.error('Error loading packages:', error);
+        return null;
     }
 }
 
-// Override the existing loadTestimonials function
-async function loadTestimonials() {
-    await renderTestimonials('.testimonial-grid');
+// Render packages for a specific category
+async function renderPackages(category, containerSelector) {
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+    
+    const packagesByCategory = await loadPackagesFromDB();
+    if (!packagesByCategory) return;
+    
+    const packages = packagesByCategory[category] || [];
+    
+    if (packages.length === 0) {
+        container.innerHTML = '<p class="no-packages">No packages available in this category.</p>';
+        return;
+    }
+    
+    let html = '';
+    packages.forEach(pkg => {
+        const highlights = pkg.highlights || [];
+        const features = pkg.features || ['Hotels', 'Transfers', 'Meals', 'Sightseeing'];
+        
+        html += `
+            <div class="card" tabindex="0">
+                <img class="card-img" src="${pkg.image || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'180\' viewBox=\'0 0 300 180\'%3E%3Crect width=\'300\' height=\'180\' fill=\'%230a2540\'/%3E%3Ctext x=\'50\' y=\'100\' fill=\'%23ff6600\' font-family=\'Arial\' font-size=\'16\'%3E${pkg.name}%3C/text%3E%3C/svg%3E'}" 
+                     alt="${pkg.name}" loading="lazy" onerror="handleImageError(this)">
+                <div class="card-content">
+                    <div class="card-header">
+                        <h3>${pkg.name}</h3>
+                        <span class="rating"><i class="fas fa-star"></i> ${pkg.rating || 4.5} • ${pkg.reviews_count || 0} reviews</span>
+                    </div>
+                    <div class="duration"><i class="far fa-calendar-alt"></i> ${pkg.duration}</div>
+                    <div class="features-list">
+                        ${features.map(f => `<span><i class="fas fa-check-circle"></i> ${f}</span>`).join('')}
+                    </div>
+                    <ul class="highlights">
+                        ${highlights.slice(0, 3).map(h => `<li><i class="fas fa-check-circle"></i> ${h}</li>`).join('')}
+                    </ul>
+                    <div class="price">₹${pkg.price} <small>per person</small></div>
+                    <a href="#" class="enquire-btn" onclick="enquirePackage('${pkg.name}', '${pkg.price}'); return false;">
+                        <i class="fab fa-whatsapp"></i> Enquire Now
+                    </a>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Enquire about a package
+async function enquirePackage(packageName, price) {
+    const name = prompt('Enter your name:');
+    if (!name) return;
+    
+    const phone = prompt('Enter your phone number:');
+    if (!phone) return;
+    
+    // Store lead in database
+    try {
+        await supabaseClient.from('leads').insert([
+            {
+                name,
+                phone,
+                package_name: packageName,
+                source: 'enquire',
+                message: `Interested in ${packageName} package at ₹${price}`,
+                status: 'new'
+            }
+        ]);
+        
+        // Open WhatsApp
+        const msg = encodeURIComponent(`Hi, I'm interested in ${packageName} package at ₹${price}.\n\nName: ${name}\nPhone: ${phone}`);
+        window.open(`https://wa.me/919395319499?text=${msg}`, '_blank');
+    } catch (error) {
+        console.error('Error saving lead:', error);
+        // Still open WhatsApp even if DB fails
+        const msg = encodeURIComponent(`Hi, I'm interested in ${packageName} package at ₹${price}.\n\nName: ${name}\nPhone: ${phone}`);
+        window.open(`https://wa.me/919395319499?text=${msg}`, '_blank');
+    }
+}
+
+// Render testimonials
+async function renderTestimonials(containerSelector) {
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+    
+    try {
+        const { data, error } = await supabaseClient
+            .from('testimonials')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(6);
+        
+        if (error) throw error;
+        
+        const testimonials = data || [];
+        
+        if (!testimonials.length) {
+            // Keep existing static testimonials if none in DB
+            return;
+        }
+        
+        let html = '';
+        testimonials.forEach(t => {
+            html += `
+                <div class="testimonial-card">
+                    <i class="fas fa-quote-right"></i>
+                    <p>${t.review_text}</p>
+                    <div class="customer-row">
+                        <img class="customer-photo" src="${t.customer_photo || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\' viewBox=\'0 0 48 48\'%3E%3Ccircle cx=\'24\' cy=\'24\' r=\'24\' fill=\'%23ff6600\'/%3E%3Ctext x=\'16\' y=\'32\' fill=\'white\' font-size=\'20\'%3E👤%3C/text%3E%3C/svg%3E'}" 
+                             alt="${t.customer_name}" onerror="handleImageError(this)">
+                        <span class="customer">— ${t.customer_name}${t.destination ? `, ${t.destination}` : ''}</span>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Error loading testimonials:', error);
+    }
 }
 
 // Initialize everything when page loads
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM loaded, initializing CMS...');
+    
     // Apply settings
-    await applySettings();
+    if (typeof applySettings === 'function') {
+        await applySettings();
+    }
     
     // Load testimonials
     await renderTestimonials('.testimonial-grid');
     
     // Load packages based on current page
-    await loadPackages();
+    const currentPage = window.location.hash.substring(1) || 'home';
     
-    // Re-run when page changes via navigation
+    if (currentPage === 'domestic' && document.querySelector('.package-grid')) {
+        await renderPackages('domestic', '.package-grid');
+    }
+    
+    if (currentPage === 'international' && document.querySelector('.package-grid')) {
+        await renderPackages('international', '.package-grid');
+    }
+    
+    if (currentPage === 'honeymoon' && document.querySelector('.romance-grid')) {
+        const packagesByCategory = await loadPackagesFromDB();
+        if (packagesByCategory) {
+            const packages = packagesByCategory.honeymoon || [];
+            const romanceGrid = document.querySelector('.romance-grid');
+            
+            if (romanceGrid && packages.length) {
+                let html = '';
+                packages.forEach(pkg => {
+                    html += `
+                        <div class="romance-card">
+                            <img class="romance-img" src="${pkg.image || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%230a2540\'/%3E%3Ctext x=\'50\' y=\'110\' fill=\'%23ff6600\' font-size=\'24\'%3E${pkg.name}%3C/text%3E%3C/svg%3E'}" 
+                                 alt="${pkg.name}" loading="lazy" onerror="handleImageError(this)">
+                            <div class="romance-content">
+                                <div class="heart-icon">❤️</div>
+                                <h3>${pkg.name}</h3>
+                                <p>${pkg.description || 'Romantic getaway for couples'}</p>
+                                <div class="price">₹${pkg.price} <small>per couple</small></div>
+                                <a href="#" class="btn" onclick="enquirePackage('${pkg.name}', '${pkg.price}'); return false;"><i class="fab fa-whatsapp"></i> Enquire</a>
+                            </div>
+                        </div>
+                    `;
+                });
+                romanceGrid.innerHTML = html;
+            }
+        }
+    }
+    
+    // Override navigateTo function to reload content on page change
     const originalNavigate = window.navigateTo;
     if (originalNavigate) {
         window.navigateTo = async function(page) {
             originalNavigate(page);
             setTimeout(async () => {
-                await applySettings();
                 await renderTestimonials('.testimonial-grid');
-                await loadPackages();
+                
+                if (page === 'domestic' && document.querySelector('.package-grid')) {
+                    await renderPackages('domestic', '.package-grid');
+                }
+                
+                if (page === 'international' && document.querySelector('.package-grid')) {
+                    await renderPackages('international', '.package-grid');
+                }
+                
+                if (page === 'honeymoon' && document.querySelector('.romance-grid')) {
+                    const packagesByCategory = await loadPackagesFromDB();
+                    if (packagesByCategory) {
+                        const packages = packagesByCategory.honeymoon || [];
+                        const romanceGrid = document.querySelector('.romance-grid');
+                        
+                        if (romanceGrid) {
+                            let html = '';
+                            packages.forEach(pkg => {
+                                html += `
+                                    <div class="romance-card">
+                                        <img class="romance-img" src="${pkg.image || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%230a2540\'/%3E%3Ctext x=\'50\' y=\'110\' fill=\'%23ff6600\' font-size=\'24\'%3E${pkg.name}%3C/text%3E%3C/svg%3E'}" 
+                                             alt="${pkg.name}" loading="lazy" onerror="handleImageError(this)">
+                                        <div class="romance-content">
+                                            <div class="heart-icon">❤️</div>
+                                            <h3>${pkg.name}</h3>
+                                            <p>${pkg.description || 'Romantic getaway for couples'}</p>
+                                            <div class="price">₹${pkg.price} <small>per couple</small></div>
+                                            <a href="#" class="btn" onclick="enquirePackage('${pkg.name}', '${pkg.price}'); return false;"><i class="fab fa-whatsapp"></i> Enquire</a>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            romanceGrid.innerHTML = html;
+                        }
+                    }
+                }
             }, 200);
         };
     }
 });
+
+// Make functions globally available
+window.loadPackagesFromDB = loadPackagesFromDB;
+window.renderPackages = renderPackages;
+window.enquirePackage = enquirePackage;
+window.renderTestimonials = renderTestimonials;
 </script>
 </body>
 </html>
