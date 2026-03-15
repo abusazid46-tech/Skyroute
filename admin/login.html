@@ -1,48 +1,219 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-
-<title>Skyroute CMS</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Sky Route Global</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a2540, #1e3a5f);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo img {
+            height: 60px;
+            width: auto;
+            margin-bottom: 10px;
+        }
+        
+        .logo h1 {
+            color: #0a2540;
+            font-size: 1.5rem;
+        }
+        
+        .logo span {
+            color: #ff6600;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #ff6600;
+            box-shadow: 0 0 0 3px rgba(255,102,0,0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #ff6600;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            background: #e65c00;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255,102,0,0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .info {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .info a {
+            color: #ff6600;
+            text-decoration: none;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-
 <body>
-
-<h2>Admin Login</h2>
-
-<input id="email" placeholder="Email">
-
-<input id="password" type="password" placeholder="Password">
-
-<button onclick="login()">Login</button>
-
-<script>
-
-const client=supabase.createClient(
-"SUPABASE_URL",
-"SUPABASE_PUBLIC_KEY"
-)
-
-async function login(){
-
-const {data,error}=await client.auth.signInWithPassword({
-
-email:email.value,
-password:password.value
-
-})
-
-if(error) alert(error.message)
-
-else window.location="dashboard.html"
-
-}
-
-</script>
-
-</body>
-
-</html>
+    <div class="login-container">
+        <div class="logo">
+            <img src="https://i.ibb.co/JwGLLvyP/IMG-20260225-234708.png" alt="Sky Route Global">
+            <h1>Sky Route <span>Global</span></h1>
+            <p style="color: #666; margin-top: 5px;">Admin Login</p>
+        </div>
+        
+        <div class="error" id="error-message"></div>
+        
+        <form id="login-form">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="admin@example.com" required autofocus>
+            </div>
+            
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit" class="btn" id="login-btn">
+                <span id="btn-text">Login to Dashboard</span>
+                <span id="btn-spinner" style="display: none;">
+                    <span class="spinner"></span> Logging in...
+                </span>
+            </button>
+        </form>
+        
+        <div class="info">
+            <p>Demo credentials: admin@skyrouteglobal.in / password123</p>
+            <p style="margin-top: 10px;">
+                <a href="/"><i class="fas fa-arrow-left"></i> Back to website</a>
+            </p>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://pierprjgeypcsvdlojlt.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpZXJwcmpnZXlwY3N2ZGxvamx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1ODMsImV4cCI6MjA4OTE1NzU4M30.KGz_UBwqWkO8qE4g2mQHy7ktD1ZMFTw2a9uJKuzfjCk';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('error-message');
+            const loginBtn = document.getElementById('login-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnSpinner = document.getElementById('btn-spinner');
+            
+            // Reset error
+            errorEl.style.display = 'none';
+            
+            // Show loading
+            loginBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnSpinner.style.display = 'inline-block';
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) throw error;
+                
+                // Store session
+                localStorage.setItem('admin-session', JSON.stringify(data.session));
+                
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+                
+            } catch (error) {
+                errorEl.textContent = error
