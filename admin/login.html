@@ -216,4 +216,23 @@
                 window.location.href = 'dashboard.html';
                 
             } catch (error) {
-                errorEl.textContent = error
+                errorEl.textContent = error.message || 'Invalid email or password';
+                errorEl.style.display = 'block';
+                
+                // Reset button
+                loginBtn.disabled = false;
+                btnText.style.display = 'inline-block';
+                btnSpinner.style.display = 'none';
+            }
+        });
+        
+        // Check if already logged in
+        (async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                window.location.href = 'dashboard.html';
+            }
+        })();
+    </script>
+</body>
+</html>
