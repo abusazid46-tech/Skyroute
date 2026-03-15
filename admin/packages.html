@@ -1,0 +1,82 @@
+<h2>Add Package</h2>
+
+<input id="name" placeholder="Package Name">
+
+<input id="price" placeholder="Price">
+
+<input id="duration" placeholder="Duration">
+
+<select id="category">
+
+<option>domestic</option>
+
+<option>international</option>
+
+<option>honeymoon</option>
+
+</select>
+
+<input id="image" placeholder="Image URL">
+
+<textarea id="description"></textarea>
+
+<button onclick="savePackage()">Save Package</button>
+
+<div id="packageList"></div>
+
+<script>
+
+async function savePackage(){
+
+await client.from("packages").insert([{
+
+name:name.value,
+price:price.value,
+duration:duration.value,
+category:category.value,
+image:image.value,
+description:description.value
+
+}])
+
+alert("Saved")
+
+loadPackages()
+
+}
+
+async function loadPackages(){
+
+const {data}=await client.from("packages").select("*")
+
+let html=""
+
+data.forEach(p=>{
+
+html+=`
+<div>
+
+${p.name} ₹${p.price}
+
+<button onclick="deletePackage('${p.id}')">Delete</button>
+
+</div>
+`
+
+})
+
+packageList.innerHTML=html
+
+}
+
+async function deletePackage(id){
+
+await client.from("packages").delete().eq("id",id)
+
+loadPackages()
+
+}
+
+loadPackages()
+
+</script>
