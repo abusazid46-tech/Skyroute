@@ -6,6 +6,7 @@
     <title>Dashboard - Sky Route Global Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* ... (keep all your existing styles) ... */
         * {
             margin: 0;
             padding: 0;
@@ -475,11 +476,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/config.js"></script>
     <script>
-        const supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+        // Create supabase client - use a different name to avoid conflicts
+        const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
         
         // Check authentication
         (async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) {
                 window.location.href = 'login.html';
                 return;
@@ -498,21 +500,21 @@
         async function loadDashboardStats() {
             try {
                 // Get total packages
-                const { count: packagesCount } = await supabase
+                const { count: packagesCount } = await supabaseClient
                     .from('packages')
                     .select('*', { count: 'exact', head: true });
                 
                 document.getElementById('total-packages').textContent = packagesCount || 0;
                 
                 // Get total testimonials
-                const { count: testimonialsCount } = await supabase
+                const { count: testimonialsCount } = await supabaseClient
                     .from('testimonials')
                     .select('*', { count: 'exact', head: true });
                 
                 document.getElementById('total-testimonials').textContent = testimonialsCount || 0;
                 
                 // Get total leads
-                const { count: leadsCount } = await supabase
+                const { count: leadsCount } = await supabaseClient
                     .from('leads')
                     .select('*', { count: 'exact', head: true });
                 
@@ -522,7 +524,7 @@
                 const sevenDaysAgo = new Date();
                 sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
                 
-                const { count: newLeadsCount } = await supabase
+                const { count: newLeadsCount } = await supabaseClient
                     .from('leads')
                     .select('*', { count: 'exact', head: true })
                     .gte('created_at', sevenDaysAgo.toISOString());
@@ -537,7 +539,7 @@
         // Load recent leads
         async function loadRecentLeads() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('leads')
                     .select('*')
                     .order('created_at', { ascending: false })
@@ -582,7 +584,7 @@
         document.getElementById('logout-btn').addEventListener('click', async (e) => {
             e.preventDefault();
             
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             localStorage.removeItem('admin-session');
             window.location.href = 'login.html';
         });
