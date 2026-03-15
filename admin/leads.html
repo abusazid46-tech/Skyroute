@@ -23,7 +23,6 @@
             min-height: 100vh;
         }
         
-        /* Sidebar - same as before */
         .sidebar {
             width: 260px;
             background: #0a2540;
@@ -90,7 +89,6 @@
             padding-top: 20px;
         }
         
-        /* Main content */
         .main-content {
             flex: 1;
             margin-left: 260px;
@@ -144,7 +142,6 @@
             color: #334155;
         }
         
-        /* Filters */
         .filters {
             background: white;
             padding: 20px;
@@ -197,7 +194,6 @@
             border-radius: 8px;
         }
         
-        /* Leads table */
         .leads-table-container {
             background: white;
             border-radius: 16px;
@@ -328,7 +324,6 @@
             color: #64748b;
         }
         
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -598,6 +593,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/config.js"></script>
     <script>
+        // Create supabase client
         const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
         let allLeads = [];
         let filteredLeads = [];
@@ -607,7 +603,7 @@
         
         // Check authentication
         (async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) {
                 window.location.href = 'login.html';
                 return;
@@ -618,7 +614,7 @@
         // Load leads
         async function loadLeads() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('leads')
                     .select('*')
                     .order('created_at', { ascending: false });
@@ -809,7 +805,7 @@
         // Update lead status
         async function updateStatus(id, status) {
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('leads')
                     .update({ status })
                     .eq('id', id);
@@ -820,7 +816,7 @@
                 const lead = allLeads.find(l => l.id === id);
                 if (lead) lead.status = status;
                 
-                filterLeads(); // Re-render with filters
+                filterLeads();
                 showToast('Status updated successfully');
                 
             } catch (error) {
@@ -852,10 +848,8 @@
             const headers = ['Date', 'Name', 'Phone', 'Email', 'Destination/Package', 'Source', 'Status', 'Message'];
             const csvRows = [];
             
-            // Add headers
             csvRows.push(headers.join(','));
             
-            // Add data
             filteredLeads.forEach(lead => {
                 const row = [
                     new Date(lead.created_at).toLocaleDateString('en-IN'),
@@ -908,7 +902,7 @@
         // Logout
         document.getElementById('logout-btn').addEventListener('click', async (e) => {
             e.preventDefault();
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             window.location.href = 'login.html';
         });
     </script>
