@@ -1,11 +1,14 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/index.html" },
-    { "source": "/domestic", "destination": "/domestic.html" },
-    { "source": "/international", "destination": "/international.html" },
-    { "source": "/honeymoon", "destination": "/honeymoon.html" },
-    { "source": "/contact", "destination": "/contact.html" },
-    { "source": "/(.*)", "destination": "/404.html" }
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
   ],
-  "cleanUrls": true
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
