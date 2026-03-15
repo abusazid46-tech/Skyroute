@@ -23,7 +23,6 @@
             min-height: 100vh;
         }
         
-        /* Sidebar - same as before */
         .sidebar {
             width: 260px;
             background: #0a2540;
@@ -90,7 +89,6 @@
             padding-top: 20px;
         }
         
-        /* Main content */
         .main-content {
             flex: 1;
             margin-left: 260px;
@@ -137,7 +135,6 @@
             color: #334155;
         }
         
-        /* Settings tabs */
         .settings-tabs {
             display: flex;
             gap: 10px;
@@ -166,7 +163,6 @@
             border-bottom: 3px solid #ff6600;
         }
         
-        /* Settings sections */
         .settings-section {
             display: none;
             background: white;
@@ -502,12 +498,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/config.js"></script>
     <script>
+        // Create supabase client
         const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
         let settings = {};
         
         // Check authentication
         (async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) {
                 window.location.href = 'login.html';
                 return;
@@ -518,19 +515,17 @@
         // Load settings
         async function loadSettings() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('settings')
                     .select('*');
                 
                 if (error) throw error;
                 
-                // Convert to key-value object
                 settings = {};
                 data.forEach(item => {
                     settings[item.key] = item.value;
                 });
                 
-                // Populate form fields
                 populateSettings();
                 
             } catch (error) {
@@ -541,19 +536,16 @@
         
         // Populate all form fields
         function populateSettings() {
-            // General
             document.getElementById('site_title').value = settings.site_title || 'Sky Route Global';
             document.getElementById('trust_badge_text').value = settings.trust_badge_text || 'Trusted by 500+ Travelers from worldwide ⭐⭐⭐⭐⭐';
             document.getElementById('office_hours').value = settings.office_hours || 'Mon-Sat: 9:00 AM - 7:00 PM';
             document.getElementById('map_embed_url').value = settings.map_embed_url || '';
             
-            // Contact
             document.getElementById('phone').value = settings.phone || '+91 93953 19499';
             document.getElementById('whatsapp').value = settings.whatsapp || '919395319499';
             document.getElementById('email').value = settings.email || 'skyrouteglobal1@gmail.com';
             document.getElementById('address').value = settings.address || 'Jalukbari AEC campus, Ghy 13, Assam';
             
-            // Hero
             document.getElementById('hero_title').value = settings.hero_title || 'Affordable Domestic & International Tours';
             document.getElementById('hero_subtitle').value = settings.hero_subtitle || 'Explore India and the World with Sky Route Global – budget friendly since 2017';
             if (settings.hero_image) {
@@ -561,23 +553,19 @@
                 document.getElementById('hero_image').value = settings.hero_image;
             }
             
-            // SEO
             document.getElementById('seo_title').value = settings.seo_title || 'Sky Route Global – Budget Tours from Northeast India';
             document.getElementById('seo_description').value = settings.seo_description || '';
             document.getElementById('seo_keywords').value = settings.seo_keywords || '';
             
-            // Social
             document.getElementById('facebook_url').value = settings.facebook_url || '';
             document.getElementById('instagram_url').value = settings.instagram_url || '';
         }
         
         // Switch tabs
         function switchTab(tab) {
-            // Update tab classes
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelector(`.tab[onclick*="${tab}"]`).classList.add('active');
             
-            // Update sections
             document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
             document.getElementById(`${tab}-section`).classList.add('active');
         }
@@ -630,9 +618,8 @@
             }
             
             try {
-                // Update each setting
                 for (const update of updates) {
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('settings')
                         .upsert({ key: update.key, value: update.value }, { onConflict: 'key' });
                     
@@ -640,7 +627,7 @@
                 }
                 
                 showToast(`${section} settings saved successfully`);
-                await loadSettings(); // Reload to confirm
+                await loadSettings();
                 
             } catch (error) {
                 console.error('Error saving settings:', error);
@@ -653,25 +640,23 @@
             const file = event.target.files[0];
             if (!file) return;
             
-            // Show preview
             const reader = new FileReader();
             reader.onload = (e) => {
                 document.getElementById('hero_image_preview').innerHTML = `<img src="${e.target.result}" alt="Preview">`;
             };
             reader.readAsDataURL(file);
             
-            // Upload to Supabase
             try {
                 const fileExt = file.name.split('.').pop();
                 const fileName = `hero/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
                 
-                const { data, error } = await supabase.storage
+                const { data, error } = await supabaseClient.storage
                     .from('images')
                     .upload(fileName, file);
                 
                 if (error) throw error;
                 
-                const { data: { publicUrl } } = supabase.storage
+                const { data: { publicUrl } } = supabaseClient.storage
                     .from('images')
                     .getPublicUrl(fileName);
                 
@@ -709,7 +694,7 @@
         // Logout
         document.getElementById('logout-btn').addEventListener('click', async (e) => {
             e.preventDefault();
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             window.location.href = 'login.html';
         });
     </script>
