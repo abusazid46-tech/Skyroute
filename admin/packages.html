@@ -6,6 +6,7 @@
     <title>Package Manager - Sky Route Global Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Keep all your existing styles */
         * {
             margin: 0;
             padding: 0;
@@ -23,7 +24,6 @@
             min-height: 100vh;
         }
         
-        /* Sidebar - same as dashboard */
         .sidebar {
             width: 260px;
             background: #0a2540;
@@ -90,7 +90,6 @@
             padding-top: 20px;
         }
         
-        /* Main content */
         .main-content {
             flex: 1;
             margin-left: 260px;
@@ -163,7 +162,6 @@
             background: #dc2626;
         }
         
-        /* Search and filter */
         .filters {
             background: white;
             padding: 20px;
@@ -205,7 +203,6 @@
             min-width: 150px;
         }
         
-        /* Packages grid */
         .packages-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -327,7 +324,6 @@
             background: #fecaca;
         }
         
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -695,6 +691,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/config.js"></script>
     <script>
+        // Create supabase client
         const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
         let currentPackages = [];
         let packageToDelete = null;
@@ -702,7 +699,7 @@
         
         // Check authentication
         (async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) {
                 window.location.href = 'login.html';
                 return;
@@ -713,7 +710,7 @@
         // Load packages
         async function loadPackages() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('packages')
                     .select('*')
                     .order('created_at', { ascending: false });
@@ -902,14 +899,14 @@
                 
                 if (id) {
                     // Update existing package
-                    result = await supabase
+                    result = await supabaseClient
                         .from('packages')
                         .update(packageData)
                         .eq('id', id);
                 } else {
                     // Insert new package
                     packageData.created_at = new Date().toISOString();
-                    result = await supabase
+                    result = await supabaseClient
                         .from('packages')
                         .insert([packageData]);
                 }
@@ -942,7 +939,7 @@
             if (!packageToDelete) return;
             
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('packages')
                     .delete()
                     .eq('id', packageToDelete);
@@ -976,13 +973,13 @@
                 const fileExt = file.name.split('.').pop();
                 const fileName = `packages/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
                 
-                const { data, error } = await supabase.storage
+                const { data, error } = await supabaseClient.storage
                     .from('images')
                     .upload(fileName, file);
                 
                 if (error) throw error;
                 
-                const { data: { publicUrl } } = supabase.storage
+                const { data: { publicUrl } } = supabaseClient.storage
                     .from('images')
                     .getPublicUrl(fileName);
                 
@@ -1040,7 +1037,7 @@
         // Logout
         document.getElementById('logout-btn').addEventListener('click', async (e) => {
             e.preventDefault();
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             window.location.href = 'login.html';
         });
     </script>
