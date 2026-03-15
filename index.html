@@ -1918,7 +1918,78 @@ function openWhatsApp(text) {
     }
     return false;
 }
+async function loadSiteData(){
 
+const res = await fetch("data.json")
+const data = await res.json()
+
+document.querySelector(".hero-content h1").innerText = data.hero.title
+document.querySelector(".hero-content p").innerText = data.hero.subtitle
+
+renderPackages(data.packages)
+renderTestimonials(data.testimonials)
+
+}
+
+function renderPackages(packages){
+
+let html=""
+
+packages.forEach(p=>{
+html+=`
+
+<div class="card">
+
+<img class="card-img" src="${p.image}">
+
+<div class="card-content">
+
+<h3>${p.name}</h3>
+
+<div class="duration">${p.duration}</div>
+
+<div class="price">₹${p.price}</div>
+
+<a href="#" class="enquire-btn"
+onclick="openWhatsApp('Hi I want ${p.name} package')">
+Enquire
+</a>
+
+</div>
+</div>
+
+`
+})
+
+document.querySelector(".package-grid").innerHTML = html
+
+}
+
+function renderTestimonials(list){
+
+let html=""
+
+list.forEach(t=>{
+html+=`
+
+<div class="testimonial-card">
+
+<p>${t.text}</p>
+
+<div class="customer-row">
+<img class="customer-photo" src="${t.image}">
+<span>${t.name}</span>
+</div>
+
+</div>
+`
+})
+
+document.querySelector(".testimonial-grid").innerHTML = html
+
+}
+
+loadSiteData()
         // Make functions globally available
         window.openWhatsApp = openWhatsApp;
         window.showPopup = showPopup;
