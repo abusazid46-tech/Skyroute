@@ -1918,45 +1918,7 @@ function openWhatsApp(text) {
     }
     return false;
 }
-async function loadPackages(){
 
-const {data}=await client
-.from("packages")
-.select("*")
-
-let html=""
-
-data.forEach(p=>{
-
-html+=`
-
-<div class="card">
-
-<img class="card-img" src="${p.image}">
-
-<div class="card-content">
-
-<h3>${p.name}</h3>
-
-<div class="duration">${p.duration}</div>
-
-<div class="price">₹${p.price}</div>
-
-<a href="#" class="enquire-btn">Enquire</a>
-
-</div>
-
-</div>
-
-`
-
-})
-
-document.querySelector(".package-grid").innerHTML=html
-
-}
-
-loadPackages()
         // Make functions globally available
         window.openWhatsApp = openWhatsApp;
         window.showPopup = showPopup;
@@ -1965,5 +1927,87 @@ loadPackages()
         window.handleImageError = handleImageError;
         window.sendContactMessage = sendContactMessage;
     </script>
+    <!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/loadPackages.js"></script>
+<script src="js/loadTestimonials.js"></script>
+<script src="js/loadSettings.js"></script>
+
+<script>
+// Override the existing loadPackages function with our dynamic version
+async function loadPackages() {
+    const packagesByCategory = await window.loadPackages();
+    if (!packagesByCategory) return;
+    
+    // Render packages for each category based on current page
+    const currentPage = window.location.hash.substring(1) || 'home';
+    
+    if (currentPage === 'domestic' && document.querySelector('.package-grid')) {
+        renderPackages('domestic', '.package-grid');
+    }
+    
+    if (currentPage === 'international' && document.querySelector('.package-grid')) {
+        renderPackages('international', '.package-grid');
+    }
+    
+    if (currentPage === 'honeymoon' && document.querySelector('.romance-grid')) {
+        // For honeymoon, we need to convert package data to romance card format
+        const packages = packagesByCategory.honeymoon || [];
+        const romanceGrid = document.querySelector('.romance-grid');
+        
+        if (romanceGrid && packages.length) {
+            let html = '';
+            packages.forEach(pkg => {
+                html += `
+                    <div class="romance-card">
+                        <img class="romance-img" src="${pkg.image || 'https://via.placeholder.com/300x200'}" alt="${pkg.name}" loading="lazy" onerror="handleImageError(this)">
+                        <div class="romance-content">
+                            <div class="heart-icon">❤️</div>
+                            <h3>${pkg.name}</h3>
+                            <p>${pkg.description || 'Romantic getaway for couples'}</p>
+                            <div class="price">₹${pkg.price} <small>per couple</small></div>
+                            <a href="#" class="btn" onclick="enquirePackage('${pkg.name}', '${pkg.price}'); return false;"><i class="fab fa-whatsapp"></i> Enquire</a>
+                        </div>
+                    </div>
+                `;
+            });
+            romanceGrid.innerHTML = html;
+        }
+    }
+}
+
+// Override the existing loadTestimonials function
+async function loadTestimonials() {
+    await renderTestimonials('.testimonial-grid');
+}
+
+// Initialize everything when page loads
+document.addEventListener('DOMContentLoaded', async function() {
+    // Apply settings
+    await applySettings();
+    
+    // Load testimonials
+    await renderTestimonials('.testimonial-grid');
+    
+    // Load packages based on current page
+    await loadPackages();
+    
+    // Re-run when page changes via navigation
+    const originalNavigate = window.navigateTo;
+    if (originalNavigate) {
+        window.navigateTo = async function(page) {
+            originalNavigate(page);
+            setTimeout(async () => {
+                await applySettings();
+                await renderTestimonials('.testimonial-grid');
+                await loadPackages();
+            }, 200);
+        };
+    }
+});
+</script>
 </body>
 </html>
