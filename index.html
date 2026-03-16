@@ -982,7 +982,7 @@
             <a href="#" data-page="contact">Contact Us</a>
         </div>
         <p>Serving Assam | India | Globally</p>
-        <p>© Sky Route Global 2026</p>
+        <p>© Sky Rote Global 2026</p>
         <p style="margin-top:20px; font-size:0.8rem;" id="footer-address">📍 Jalukbari AEC campus, Ghy 13, Assam</p>
     </footer>
 
@@ -993,9 +993,9 @@
     </div>
 
     <!-- POPUP CALLBACK FORM -->
-    <div id="callbackPopup" class="popup-overlay">
+    <div id="callbakPopup" class="popup-overlay">
         <div class="popup-card">
-            <span class="close-popup" onclick="hidePopup()">&times;</span>
+          <span class="close-popup" onclick="hidePopup()">&times;</span>
             <h3>Request a Callback</h3>
             <input type="text" placeholder="Your name" id="cbName">
             <input type="tel" placeholder="Phone number" id="cbPhone">
@@ -1006,7 +1006,6 @@
 
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script>
     // ===== SUPABASE CONFIGURATION =====
     const SUPABASE_CONFIG = {
@@ -1018,7 +1017,39 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
     
     console.log('Supabase client initialized');
+
+    // ===== TEST DATABASE CONNECTION =====
+    async function testDatabaseConnection() {
+        try {
+            // Test packages table
+            const { data: packages, error: packagesError } = await supabaseClient
+                .from('packages')
+                .select('count', { count: 'exact', head: true });
+            
+            console.log('Packages table test:', packagesError ? '❌ ' + packagesError.message : '✅ Connected');
+            
+            // Test testimonials table
+            const { data: testimonials, error: testimonialsError } = await supabaseClient
+                .from('testimonials')
+                .select('count', { count: 'exact', head: true });
+            
+            console.log('Testimonials table test:', testimonialsError ? '❌ ' + testimonialsError.message : '✅ Connected');
+            
+            // Test settings table
+            const { data: settings, error: settingsError } = await supabaseClient
+                .from('settings')
+                .select('count', { count: 'exact', head: true });
+            
+            console.log('Settings table test:', settingsError ? '❌ ' + settingsError.message : '✅ Connected');
+            
+        } catch (error) {
+            console.error('Database connection test failed:', error);
+        }
+    }
     
+    // Run connection test
+    testDatabaseConnection();
+
     // ===== GLOBAL ERROR HANDLER =====
     window.onerror = function(msg, url, lineNo, columnNo, error) {
         console.error('Error caught:', msg, 'at', lineNo);
@@ -1064,7 +1095,7 @@
     function whatsappCallback() {
         const name = document.getElementById('cbName').value || 'Guest';
         const phone = document.getElementById('cbPhone').value || 'not provided';
-        const message = document.getElementById('cbMessage').value || 'No message';
+        const message = document.getElementById('cbMessage')?.value || 'No message';
         const msg = encodeURIComponent(`Hi, I need a callback. Name: ${name}, Phone: ${phone}, Message: ${message}`);
         openWhatsApp(msg);
         hidePopup();
@@ -1130,17 +1161,17 @@
                 .order('created_at', { ascending: false });
             
             if (error) {
-                console.error('Supabase error:', error);
+                console.error('Supabase packages error:', error);
                 throw error;
             }
             
-            console.log('Packages loaded:', data);
+            console.log('Packages loaded:', data?.length || 0, 'packages');
             
             // Group packages by category
             const packagesByCategory = {
-                domestic: data.filter(p => p.category === 'domestic'),
-                international: data.filter(p => p.category === 'international'),
-                honeymoon: data.filter(p => p.category === 'honeymoon')
+                domestic: data?.filter(p => p.category === 'domestic') || [],
+                international: data?.filter(p => p.category === 'international') || [],
+                honeymoon: data?.filter(p => p.category === 'honeymoon') || []
             };
             
             return packagesByCategory;
@@ -1167,7 +1198,7 @@
         }
         
         const packages = packagesByCategory[category] || [];
-        console.log(`${category} packages:`, packages);
+        console.log(`${category} packages:`, packages.length);
         
         if (packages.length === 0) {
             container.innerHTML = '<div class="no-packages">No packages available in this category.</div>';
@@ -1235,7 +1266,7 @@
         }
         
         const packages = packagesByCategory.honeymoon || [];
-        console.log('Honeymoon packages:', packages);
+        console.log('Honeymoon packages:', packages.length);
         
         if (packages.length === 0) {
             container.innerHTML = '<div class="no-packages">No honeymoon packages available.</div>';
@@ -1279,7 +1310,7 @@
         
         // Store lead in database
         try {
-            await supabaseClient.from('leads').insert([
+            const { error } = await supabaseClient.from('leads').insert([
                 {
                     name,
                     phone,
@@ -1289,7 +1320,12 @@
                     status: 'new'
                 }
             ]);
-            console.log('Lead saved successfully');
+            
+            if (error) {
+                console.error('Error saving lead:', error);
+            } else {
+                console.log('Lead saved successfully');
+            }
         } catch (error) {
             console.error('Error saving lead:', error);
         }
@@ -1302,7 +1338,10 @@
     // Render testimonials from database
     async function renderTestimonialsFromDB() {
         const container = document.querySelector('.testimonial-grid');
-        if (!container) return;
+        if (!container) {
+            console.log('Testimonial container not found');
+            return;
+        }
         
         try {
             console.log('Fetching testimonials from Supabase...');
@@ -1312,15 +1351,19 @@
                 .order('created_at', { ascending: false })
                 .limit(6);
             
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase testimonials error:', error);
+                throw error;
+            }
             
             const testimonials = data || [];
-            console.log('Testimonials loaded:', testimonials);
+            console.log('Testimonials loaded:', testimonials.length);
             
             // Only replace if we have testimonials
             if (testimonials.length > 0) {
                 let html = '';
                 testimonials.forEach(t => {
+                    const stars = '★'.repeat(t.rating || 5);
                     html += `
                         <div class="testimonial-card">
                             <i class="fas fa-quote-right"></i>
@@ -1334,6 +1377,9 @@
                     `;
                 });
                 container.innerHTML = html;
+                console.log('Testimonials rendered to page');
+            } else {
+                console.log('No testimonials in database, keeping static ones');
             }
         } catch (error) {
             console.error('Error loading testimonials:', error);
@@ -1348,7 +1394,10 @@
                 .from('settings')
                 .select('*');
             
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase settings error:', error);
+                throw error;
+            }
             
             const settings = {};
             data.forEach(item => {
@@ -1360,6 +1409,7 @@
             // Update page title
             if (settings.seo_title) {
                 document.title = settings.seo_title;
+                console.log('Updated title to:', settings.seo_title);
             }
             
             // Update meta description
@@ -1367,6 +1417,7 @@
                 let metaDesc = document.querySelector('meta[name="description"]');
                 if (metaDesc) {
                     metaDesc.setAttribute('content', settings.seo_description);
+                    console.log('Updated meta description');
                 }
             }
             
@@ -1375,7 +1426,30 @@
                 const footerAddress = document.getElementById('footer-address');
                 if (footerAddress) {
                     footerAddress.innerHTML = `📍 ${settings.address}`;
+                    console.log('Updated footer address');
                 }
+            }
+            
+            // Update contact page address if on contact page
+            if (window.location.hash === '#contact' || window.location.hash === '') {
+                const contactAddress = document.getElementById('contact-address');
+                if (contactAddress && settings.address) {
+                    contactAddress.textContent = settings.address;
+                }
+            }
+            
+            // Update phone number if present
+            if (settings.phone) {
+                const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
+                phoneLinks.forEach(link => {
+                    const cleanPhone = settings.phone.replace(/\D/g, '');
+                    link.href = `tel:${cleanPhone}`;
+                    if (link.classList.contains('float-btn')) {
+                        // Keep as is
+                    } else if (link.parentElement?.classList.contains('contact-info')) {
+                        link.textContent = settings.phone;
+                    }
+                });
             }
             
         } catch (error) {
@@ -1428,6 +1502,7 @@
                 <section class="testimonials">
                     <h2>Happy Travelers</h2>
                     <div class="testimonial-grid">
+                        <!-- Static testimonials as fallback -->
                         <div class="testimonial-card">
                             <i class="fas fa-quote-right"></i>
                             <p>Sky Route made our Kashmir trip memorable. So affordable!</p>
@@ -1508,11 +1583,11 @@
                 <div class="contact-section">
                     <div class="contact-grid">
                         <div class="contact-info">
-                            <p><i class="fas fa-phone-alt"></i> <a href="tel:+919395319499" style="text-decoration:none; color:inherit;">+91 93953 19499</a></p>
-                            <p><i class="fab fa-whatsapp"></i> <a href="https://wa.me/919395319499" style="text-decoration:none; color:inherit;">+91 93953 19499</a></p>
-                            <p><i class="fas fa-envelope"></i> skyrouteglobal1@gmail.com</p>
+                            <p><i class="fas fa-phone-alt"></i> <a href="tel:+919395319499" style="text-decoration:none; color:inherit;" id="contact-phone">+91 93953 19499</a></p>
+                            <p><i class="fab fa-whatsapp"></i> <a href="https://wa.me/919395319499" style="text-decoration:none; color:inherit;" id="contact-whatsapp">+91 93953 19499</a></p>
+                            <p><i class="fas fa-envelope"></i> <span id="contact-email">skyrouteglobal1@gmail.com</span></p>
                             <p><i class="fas fa-map-marker-alt"></i> <span id="contact-address">Jalukbari AEC campus, Ghy 13, Assam</span></p>
-                            <p><i class="fas fa-clock"></i> Mon-Sat: 9:00 AM - 7:00 PM</p>
+                            <p><i class="fas fa-clock"></i> <span id="contact-hours">Mon-Sat: 9:00 AM - 7:00 PM</span></p>
                             <button class="btn" onclick="showPopup()" style="margin-top:20px;"><i class="fas fa-phone"></i> Request Callback</button>
                         </div>
                         <div class="map-container">
@@ -1577,9 +1652,9 @@
             initScrollAnimations();
             loadPackagesForPage(page);
             
-            // Update contact address if on contact page
+            // Update contact info if on contact page
             if (page === 'contact') {
-                updateContactAddress();
+                applySettingsFromDB(); // This will update contact page fields
             }
         }, 100);
     }
@@ -1588,26 +1663,6 @@
         const hash = window.location.hash.substring(1) || 'home';
         if(pages[hash]) {
             navigateTo(hash);
-        }
-    }
-
-    // Update contact address from settings
-    async function updateContactAddress() {
-        try {
-            const { data, error } = await supabaseClient
-                .from('settings')
-                .select('value')
-                .eq('key', 'address')
-                .single();
-            
-            if (!error && data) {
-                const contactAddress = document.getElementById('contact-address');
-                if (contactAddress) {
-                    contactAddress.textContent = data.value;
-                }
-            }
-        } catch (error) {
-            console.error('Error updating contact address:', error);
         }
     }
 
@@ -1659,17 +1714,21 @@ Please share package details. Thank you!`;
         
         window.addEventListener('hashchange', handleHashChange);
         
-        // Load data
+        // Load all data
         setTimeout(async () => {
             setupImageErrorHandling();
             initScrollAnimations();
+            
+            // Load settings first (affects everything)
             await applySettingsFromDB();
+            
+            // Then load testimonials
             await renderTestimonialsFromDB();
+            
+            // Then load packages for current page
             await loadPackagesForPage(initialPage);
             
-            if (initialPage === 'contact') {
-                await updateContactAddress();
-            }
+            console.log('Initialization complete');
         }, 100);
     });
 
@@ -1681,6 +1740,6 @@ Please share package details. Thank you!`;
     window.handleImageError = handleImageError;
     window.sendContactMessage = sendContactMessage;
     window.enquirePackage = enquirePackage;
-    </script>
+    </script>           
 </body>
 </html>
