@@ -1063,18 +1063,24 @@
         return false;
     }
 
-    // ===== POPUP FUNCTIONS =====
+    // ===== POPUP FUNCTIONS (with null checks) =====
     function showPopup() {
-        document.getElementById('callbackPopup').style.display = 'flex';
+        const popup = document.getElementById('callbackPopup');
+        if (popup) {
+            popup.style.display = 'flex';
+        }
     }
     
     function hidePopup() {
-        document.getElementById('callbackPopup').style.display = 'none';
+        const popup = document.getElementById('callbackPopup');
+        if (popup) {
+            popup.style.display = 'none';
+        }
     }
     
     function whatsappCallback() {
-        const name = document.getElementById('cbName').value || 'Guest';
-        const phone = document.getElementById('cbPhone').value || 'not provided';
+        const name = document.getElementById('cbName')?.value || 'Guest';
+        const phone = document.getElementById('cbPhone')?.value || 'not provided';
         const message = document.getElementById('cbMessage')?.value || 'No message';
         const msg = encodeURIComponent(`Hi, I need a callback. Name: ${name}, Phone: ${phone}, Message: ${message}`);
         openWhatsApp(msg);
@@ -1083,12 +1089,15 @@
     
     window.onclick = function(e) {
         const popup = document.getElementById('callbackPopup');
-        if(e.target === popup) hidePopup();
+        if(popup && e.target === popup) hidePopup();
     }
 
-    // Auto popup after 15 seconds
+    // Auto popup after 15 seconds (only if popup exists)
     setTimeout(() => {
-        showPopup();
+        const popup = document.getElementById('callbackPopup');
+        if (popup) {
+            showPopup();
+        }
     }, 15000);
 
     // ===== IMAGE ERROR HANDLING =====
@@ -1125,7 +1134,7 @@
         }, observerOptions);
 
         document.querySelectorAll('.card, .romance-card, .feature-item, .testimonial-card').forEach(el => {
-            observer.observe(el);
+            if (el) observer.observe(el);
         });
     }
 
@@ -1291,6 +1300,7 @@
             if (error) throw error;
             
             console.log(`⭐ Loaded ${data?.length || 0} testimonials`);
+            console.log('⭐ Testimonial data:', data); // Log the actual data
             
             if (data && data.length > 0) {
                 let html = '';
@@ -1308,7 +1318,13 @@
                     `;
                 });
                 container.innerHTML = html;
-                console.log('⭐ Testimonials rendered to page');
+                console.log('⭐ Testimonials rendered to page. New HTML length:', html.length);
+                
+                // Verify the testimonials are in the DOM
+                const renderedCards = document.querySelectorAll('.testimonial-card');
+                console.log(`⭐ Found ${renderedCards.length} testimonial cards in DOM`);
+            } else {
+                console.log('No testimonials in database, keeping static ones');
             }
         } catch (error) {
             console.error('❌ Error loading testimonials:', error);
@@ -1404,7 +1420,7 @@
                 </section>
                 <section class="testimonials">
                     <h2>Happy Travelers</h2>
-                    <div class="testimonial-grid">
+                    <div class="testimonial-grid" id="testimonial-grid">
                         <!-- Testimonials will be loaded here -->
                     </div>
                 </section>
