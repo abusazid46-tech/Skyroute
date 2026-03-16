@@ -4,16 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Sky Route Global – Budget Tours from Northeast India</title>
-    <!-- All your existing meta tags and styles remain exactly the same -->
-    <!-- ... (keep all your existing head content) ... -->
-    
-    <style>
-        /<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Sky Route Global – Budget Tours from Northeast India</title>
     <!-- PRIMARY META (Boosted SEO) -->
     <meta name="google-site-verification" content="D6YbRgsmlDbnBTIrZJmKD1eIvRR4LSgrg08RFWT42FM" />
     <meta name="description" content="Affordable domestic & international tour packages from Northeast India. Family trips, honeymoon, group tours. Enquire on WhatsApp. Trusted by 500+ travelers.">
@@ -927,7 +917,7 @@
             color: white;
             font-size: 0.9rem;
         }
-        /* Add these spinner styles at the end of your style section */
+        
         .loading-spinner {
             text-align: center;
             padding: 40px;
@@ -958,9 +948,8 @@
     </style>
 </head>
 <body>
-     <h1 style="display:none">Travel Agency in Guwahati Assam – Domestic & International Tour Packages | Sky Route Global</h1>
+    <h1 style="display:none">Travel Agency in Guwahati Assam – Domestic & International Tour Packages | Sky Route Global</h1>
     
-    <!-- NAVBAR -->
     <nav class="navbar">
         <div class="container">
             <div class="logo-container">
@@ -979,10 +968,8 @@
     
     <h1 style="position:absolute;left:-9999px;">Sky Route Global Travel Agency in Assam & Delhi - Domestic and International Tour Packages</h1>
     
-    <!-- PAGE CONTENT -->
     <div id="page-content"></div>
 
-    <!-- FOOTER -->
     <footer>
         <div class="footer-links">
             <a href="#" data-page="home">Home</a>
@@ -992,20 +979,18 @@
             <a href="#" data-page="contact">Contact Us</a>
         </div>
         <p>Serving Assam | India | Globally</p>
-        <p>© Sky Rote Global 2026</p>
+        <p>© Sky Route Global 2026</p>
         <p style="margin-top:20px; font-size:0.8rem;" id="footer-address">📍 Jalukbari AEC campus, Ghy 13, Assam</p>
     </footer>
 
-    <!-- FLOATING BUTTONS -->
     <div class="floating-buttons">
         <a href="#" class="float-btn whatsapp" onclick="openWhatsApp('Hi! I need travel help'); return false;"><i class="fab fa-whatsapp"></i></a>
         <a href="tel:+919395319499" class="float-btn call"><i class="fas fa-phone"></i></a>
     </div>
 
-    <!-- POPUP CALLBACK FORM -->
-    <div id="callbakPopup" class="popup-overlay">
+    <div id="callbackPopup" class="popup-overlay">
         <div class="popup-card">
-          <span class="close-popup" onclick="hidePopup()">&times;</span>
+            <span class="close-popup" onclick="hidePopup()">&times;</span>
             <h3>Request a Callback</h3>
             <input type="text" placeholder="Your name" id="cbName">
             <input type="tel" placeholder="Phone number" id="cbPhone">
@@ -1014,7 +999,6 @@
         </div>
     </div>
 
-    
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -1025,27 +1009,19 @@
         key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpZXJwcmpnZXlwY3N2ZGxvamx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1ODMsImV4cCI6MjA4OTE1NzU4M30.KGz_UBwqWkO8qE4g2mQHy7ktD1ZMFTw2a9uJKuzfjCk'
     };
     
-    // Initialize Supabase client
     const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
-    
     console.log('✅ Supabase client initialized');
 
-    // ===== GLOBAL ERROR HANDLER =====
-    window.onerror = function(msg, url, lineNo, columnNo, error) {
+    // ===== ERROR HANDLER =====
+    window.onerror = function(msg, url, lineNo) {
         console.error('Error caught:', msg, 'at', lineNo);
         return true;
     };
-
-    window.addEventListener('unhandledrejection', function(event) {
-        console.error('Unhandled rejection:', event.reason);
-        event.preventDefault();
-    });
 
     // ===== WHATSAPP FUNCTIONS =====
     function openWhatsApp(text) {
         const msg = encodeURIComponent(text);
         const phone = '919395319499';
-        
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         
         try {
@@ -1063,19 +1039,15 @@
         return false;
     }
 
-    // ===== POPUP FUNCTIONS (with null checks) =====
+    // ===== POPUP FUNCTIONS =====
     function showPopup() {
         const popup = document.getElementById('callbackPopup');
-        if (popup) {
-            popup.style.display = 'flex';
-        }
+        if (popup) popup.style.display = 'flex';
     }
     
     function hidePopup() {
         const popup = document.getElementById('callbackPopup');
-        if (popup) {
-            popup.style.display = 'none';
-        }
+        if (popup) popup.style.display = 'none';
     }
     
     function whatsappCallback() {
@@ -1092,20 +1064,17 @@
         if(popup && e.target === popup) hidePopup();
     }
 
-    // Auto popup after 15 seconds (only if popup exists)
     setTimeout(() => {
         const popup = document.getElementById('callbackPopup');
-        if (popup) {
-            showPopup();
-        }
+        if (popup) showPopup();
     }, 15000);
 
     // ===== IMAGE ERROR HANDLING =====
     function handleImageError(img) {
         if (img.classList.contains('customer-photo')) {
             img.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\' viewBox=\'0 0 48 48\'%3E%3Ccircle cx=\'24\' cy=\'24\' r=\'24\' fill=\'%23ff6600\'/%3E%3Ctext x=\'16\' y=\'32\' fill=\'white\' font-size=\'20\'%3E👤%3C/text%3E%3C/svg%3E';
-        } else if (img.classList.contains('card-img') || img.classList.contains('romance-img') || img.classList.contains('hero-image img')) {
-            img.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%230a2540\'/%3E%3Ctext x=\'50\' y=\'110\' fill=\'%23ff6600\' font-size=\'24\'%3EDestination Image%3C/text%3E%3C/svg%3E';
+        } else {
+            img.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%230a2540\'/%3E%3Ctext x=\'50\' y=\'110\' fill=\'%23ff6600\' font-size=\'24\'%3EImage%3C/text%3E%3C/svg%3E';
         }
         img.classList.add('error-fallback');
     }
@@ -1119,11 +1088,6 @@
 
     // ===== SCROLL ANIMATIONS =====
     function initScrollAnimations() {
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -1131,7 +1095,7 @@
                     observer.unobserve(entry.target);
                 }
             });
-        }, observerOptions);
+        }, { threshold: 0.1 });
 
         document.querySelectorAll('.card, .romance-card, .feature-item, .testimonial-card').forEach(el => {
             if (el) observer.observe(el);
@@ -1139,38 +1103,26 @@
     }
 
     // ===== CMS FUNCTIONS =====
-    
-    // Load packages from database
     async function loadPackagesFromDB() {
         try {
-            console.log('📦 Fetching packages...');
             const { data, error } = await supabaseClient
                 .from('packages')
                 .select('*')
                 .order('created_at', { ascending: false });
-            
             if (error) throw error;
-            
-            console.log(`📦 Loaded ${data?.length || 0} packages`);
             return data || [];
         } catch (error) {
-            console.error('❌ Error loading packages:', error);
+            console.error('Error loading packages:', error);
             return [];
         }
     }
 
-    // Render packages for domestic/international
-    async function renderPackages(category, containerId) {
-        const container = document.getElementById(containerId);
-        if (!container) {
-            console.log(`Container #${containerId} not found`);
-            return;
-        }
+    async function renderPackages(category, containerSelector) {
+        const container = document.querySelector(containerSelector);
+        if (!container) return;
         
         const allPackages = await loadPackagesFromDB();
         const packages = allPackages.filter(p => p.category === category);
-        
-        console.log(`📦 Rendering ${packages.length} ${category} packages`);
         
         if (packages.length === 0) {
             container.innerHTML = '<div class="no-packages">No packages available in this category.</div>';
@@ -1211,22 +1163,18 @@
         });
         
         container.innerHTML = html;
-        
         setTimeout(() => {
             initScrollAnimations();
             setupImageErrorHandling();
         }, 100);
     }
 
-    // Render honeymoon packages
-    async function renderHoneymoonPackages(containerId) {
-        const container = document.getElementById(containerId);
+    async function renderHoneymoonPackages(containerSelector) {
+        const container = document.querySelector(containerSelector);
         if (!container) return;
         
         const allPackages = await loadPackagesFromDB();
         const packages = allPackages.filter(p => p.category === 'honeymoon');
-        
-        console.log(`❤️ Rendering ${packages.length} honeymoon packages`);
         
         if (packages.length === 0) {
             container.innerHTML = '<div class="no-packages">No honeymoon packages available.</div>';
@@ -1236,7 +1184,6 @@
         let html = '';
         packages.forEach(pkg => {
             const safeName = pkg.name.replace(/'/g, "\\'");
-            
             html += `
                 <div class="romance-card">
                     <img class="romance-img" src="${pkg.image || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%230a2540\'/%3E%3Ctext x=\'50\' y=\'110\' fill=\'%23ff6600\' font-size=\'24\'%3E' + pkg.name + '%3C/text%3E%3C/svg%3E'}" 
@@ -1253,18 +1200,15 @@
         });
         
         container.innerHTML = html;
-        
         setTimeout(() => {
             initScrollAnimations();
             setupImageErrorHandling();
         }, 100);
     }
 
-    // Enquire about a package
     async function enquirePackage(packageName, price) {
         const name = prompt('Enter your name:');
         if (!name) return;
-        
         const phone = prompt('Enter your phone number:');
         if (!phone) return;
         
@@ -1272,7 +1216,6 @@
             await supabaseClient.from('leads').insert([
                 { name, phone, package_name: packageName, source: 'enquire', status: 'new' }
             ]);
-            console.log('✅ Lead saved');
         } catch (error) {
             console.error('Error saving lead:', error);
         }
@@ -1281,16 +1224,11 @@
         window.open(`https://wa.me/919395319499?text=${msg}`, '_blank');
     }
 
-    // Render testimonials from database
     async function renderTestimonialsFromDB() {
         const container = document.querySelector('.testimonial-grid');
-        if (!container) {
-            console.log('Testimonial container not found');
-            return;
-        }
+        if (!container) return;
         
         try {
-            console.log('⭐ Fetching testimonials...');
             const { data, error } = await supabaseClient
                 .from('testimonials')
                 .select('*')
@@ -1298,9 +1236,6 @@
                 .limit(6);
             
             if (error) throw error;
-            
-            console.log(`⭐ Loaded ${data?.length || 0} testimonials`);
-            console.log('⭐ Testimonial data:', data); // Log the actual data
             
             if (data && data.length > 0) {
                 let html = '';
@@ -1318,23 +1253,14 @@
                     `;
                 });
                 container.innerHTML = html;
-                console.log('⭐ Testimonials rendered to page. New HTML length:', html.length);
-                
-                // Verify the testimonials are in the DOM
-                const renderedCards = document.querySelectorAll('.testimonial-card');
-                console.log(`⭐ Found ${renderedCards.length} testimonial cards in DOM`);
-            } else {
-                console.log('No testimonials in database, keeping static ones');
             }
         } catch (error) {
-            console.error('❌ Error loading testimonials:', error);
+            console.error('Error loading testimonials:', error);
         }
     }
 
-    // Apply settings from database
     async function applySettingsFromDB() {
         try {
-            console.log('⚙️ Fetching settings...');
             const { data, error } = await supabaseClient
                 .from('settings')
                 .select('*');
@@ -1342,50 +1268,27 @@
             if (error) throw error;
             
             const settings = {};
-            data.forEach(item => {
-                settings[item.key] = item.value;
-            });
+            data.forEach(item => { settings[item.key] = item.value; });
             
-            console.log('⚙️ Settings loaded:', settings);
-            
-            // Update page title
-            if (settings.seo_title) {
-                document.title = settings.seo_title;
-            }
-            
-            // Update meta description
+            if (settings.seo_title) document.title = settings.seo_title;
             if (settings.seo_description) {
                 let metaDesc = document.querySelector('meta[name="description"]');
                 if (metaDesc) metaDesc.setAttribute('content', settings.seo_description);
             }
             
-            // Update footer address
-            const footerAddress = document.querySelector('footer p:last-child');
+            const footerAddress = document.getElementById('footer-address');
             if (footerAddress && settings.address) {
                 footerAddress.innerHTML = `📍 ${settings.address}`;
             }
             
-            // Update contact page if visible
             if (window.location.hash === '#contact' || window.location.hash === '') {
-                const contactAddress = document.getElementById('contact-address');
+                const contactAddress = document.querySelector('.contact-info p:nth-child(4)');
                 if (contactAddress && settings.address) {
-                    contactAddress.textContent = settings.address;
+                    contactAddress.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${settings.address}`;
                 }
             }
-            
         } catch (error) {
-            console.error('❌ Error applying settings:', error);
-        }
-    }
-
-    // Load packages based on current page
-    async function loadPackagesForPage(page) {
-        if (page === 'domestic') {
-            await renderPackages('domestic', 'domestic-packages');
-        } else if (page === 'international') {
-            await renderPackages('international', 'international-packages');
-        } else if (page === 'honeymoon') {
-            await renderHoneymoonPackages('honeymoon-packages');
+            console.error('Error applying settings:', error);
         }
     }
 
@@ -1420,8 +1323,32 @@
                 </section>
                 <section class="testimonials">
                     <h2>Happy Travelers</h2>
-                    <div class="testimonial-grid" id="testimonial-grid">
-                        <!-- Testimonials will be loaded here -->
+                    <div class="testimonial-grid">
+                        <!-- Static testimonials as fallback -->
+                        <div class="testimonial-card">
+                            <i class="fas fa-quote-right"></i>
+                            <p>Sky Route made our Kashmir trip memorable. So affordable!</p>
+                            <div class="customer-row">
+                                <img class="customer-photo" src="https://i.ibb.co/kgfvmCxG/images-4.jpg" alt="Priya" loading="lazy" onerror="handleImageError(this)">
+                                <span class="customer">— Priya, Guwahati</span>
+                            </div>
+                        </div>
+                        <div class="testimonial-card">
+                            <i class="fas fa-quote-right"></i>
+                            <p>Best Dubai deal! Everything was smooth. Thank you team.</p>
+                            <div class="customer-row">
+                                <img class="customer-photo" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop" alt="Rajesh" loading="lazy" onerror="handleImageError(this)">
+                                <span class="customer">— Rajesh, Delhi</span>
+                            </div>
+                        </div>
+                        <div class="testimonial-card">
+                            <i class="fas fa-quote-right"></i>
+                            <p>Group tour to Sikkim was fantastic. 24/7 support helped us.</p>
+                            <div class="customer-row">
+                                <img class="customer-photo" src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1974&auto=format&fit=crop" alt="Anita" loading="lazy" onerror="handleImageError(this)">
+                                <span class="customer">— Anita, Kolkata</span>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </main>
@@ -1457,14 +1384,12 @@
                     <p>Romantic escapes customized just for two. Special discounts for newlyweds!</p>
                     <a href="#" class="btn" onclick="openWhatsApp('Hi! I want honeymoon package details'); return false;"><i class="fab fa-whatsapp"></i> Get honeymoon quote</a>
                 </div>
-                
                 <div class="romance-grid" id="honeymoon-packages">
                     <div class="loading-spinner">
                         <div class="spinner"></div>
                         <p style="margin-top: 10px;">Loading honeymoon packages...</p>
                     </div>
                 </div>
-                
                 <div style="text-align: center; margin: 50px 0; background: #f1f5f9; padding: 40px; border-radius: 40px;">
                     <h3>✨ Honeymoon Add-ons ✨</h3>
                     <p style="margin: 20px 0;">Candlelight dinners • Couple spa • Private photoshoot • Flower bed decoration</p>
@@ -1481,7 +1406,7 @@
                             <p><i class="fas fa-phone-alt"></i> <a href="tel:+919395319499" style="text-decoration:none; color:inherit;">+91 93953 19499</a></p>
                             <p><i class="fab fa-whatsapp"></i> <a href="https://wa.me/919395319499" style="text-decoration:none; color:inherit;">+91 93953 19499</a></p>
                             <p><i class="fas fa-envelope"></i> skyrouteglobal1@gmail.com</p>
-                            <p><i class="fas fa-map-marker-alt"></i> <span id="contact-address">Jalukbari AEC campus, Ghy 13, Assam</span></p>
+                            <p><i class="fas fa-map-marker-alt"></i> Jalukbari AEC campus, Ghy 13, Assam</p>
                             <p><i class="fas fa-clock"></i> Mon-Sat: 9:00 AM - 7:00 PM</p>
                             <button class="btn" onclick="showPopup()" style="margin-top:20px;"><i class="fas fa-phone"></i> Request Callback</button>
                         </div>
@@ -1489,7 +1414,6 @@
                             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3581.943752505748!2d91.68154331402953!3d26.14360698346047!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x375a5b7b8b8b8b8b%3A0x8a9a9a9a9a9a9a!2sAEC%20Campus%2C%20Jalukbari%2C%20Guwahati%2C%20Assam!5e0!3m2!1sen!2sin!4v1712345678901!5m2!1sen!2sin" allowfullscreen="" loading="lazy"></iframe>
                         </div>
                     </div>
-                    
                     <div class="contact-form">
                         <h3 style="margin-bottom: 20px;">Send us a message</h3>
                         <div class="form-group">
@@ -1516,7 +1440,6 @@
                         <button class="btn" onclick="sendContactMessage()"><i class="fab fa-whatsapp"></i> Send via WhatsApp</button>
                     </div>
                 </div>
-                
                 <h2 style="margin-top: 40px;">Frequently Asked Questions</h2>
                 <div class="faq-grid">
                     <div class="faq-item"><div class="faq-question">✈️ Visa Assistance?</div><div>Yes, we provide end-to-end visa guidance for all international tours.</div></div>
@@ -1531,12 +1454,9 @@
 
     // ===== NAVIGATION =====
     function navigateTo(page) {
-        console.log('Navigating to:', page);
         document.getElementById('page-content').innerHTML = pages[page];
-        
         document.querySelectorAll('.nav-link').forEach(link => {
-            if(link.dataset.page === page) link.classList.add('active');
-            else link.classList.remove('active');
+            link.classList.toggle('active', link.dataset.page === page);
         });
         
         window.location.hash = page;
@@ -1545,23 +1465,19 @@
         setTimeout(() => {
             setupImageErrorHandling();
             initScrollAnimations();
-            loadPackagesForPage(page);
             
-            // Load testimonials only on home page
-            if (page === 'home') {
-                renderTestimonialsFromDB();
-            }
+            if (page === 'domestic') renderPackages('domestic', '#domestic-packages');
+            else if (page === 'international') renderPackages('international', '#international-packages');
+            else if (page === 'honeymoon') renderHoneymoonPackages('#honeymoon-packages');
+            else if (page === 'home') renderTestimonialsFromDB();
         }, 100);
     }
 
     function handleHashChange() {
         const hash = window.location.hash.substring(1) || 'home';
-        if(pages[hash]) {
-            navigateTo(hash);
-        }
+        if (pages[hash]) navigateTo(hash);
     }
 
-    // Contact form function
     function sendContactMessage() {
         const name = document.getElementById('contactName')?.value || 'Guest';
         const email = document.getElementById('contactEmail')?.value || 'not provided';
@@ -1569,57 +1485,38 @@
         const interest = document.getElementById('contactInterest')?.value || 'General';
         const message = document.getElementById('contactMessage')?.value || 'No message';
         
-        const plainMessage = `Hi Sky Route Global,
-
-I'm interested in a travel package.
-📋 Details:
-• Name: ${name}
-• Email: ${email}
-• Phone: ${phone}
-• Interested in: ${interest}
-• Message: ${message}
-
-Please share package details. Thank you!`;
-        
+        const plainMessage = `Hi Sky Route Global,\n\nI'm interested in a travel package.\n📋 Details:\n• Name: ${name}\n• Email: ${email}\n• Phone: ${phone}\n• Interested in: ${interest}\n• Message: ${message}\n\nPlease share package details. Thank you!`;
         openWhatsApp(plainMessage);
     }
 
     // ===== INITIALIZATION =====
-    document.addEventListener('DOMContentLoaded', async function() {
-        console.log('DOM loaded, initializing...');
-        
-        // Add click handlers
+    document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.nav-link, .footer-links a').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const page = link.dataset.page;
-                if(page) navigateTo(page);
+                if (page) navigateTo(page);
             });
         });
 
-        // Load initial page
         const initialPage = window.location.hash.substring(1) || 'home';
         document.getElementById('page-content').innerHTML = pages[initialPage];
         
         document.querySelectorAll('.nav-link').forEach(link => {
-            if(link.dataset.page === initialPage) link.classList.add('active');
+            if (link.dataset.page === initialPage) link.classList.add('active');
         });
         
         window.addEventListener('hashchange', handleHashChange);
         
-        // Load all data
         setTimeout(async () => {
             setupImageErrorHandling();
             initScrollAnimations();
             await applySettingsFromDB();
             
-            if (initialPage === 'home') {
-                await renderTestimonialsFromDB();
-            }
-            
-            await loadPackagesForPage(initialPage);
-            
-            console.log('✅ Initialization complete');
+            if (initialPage === 'domestic') renderPackages('domestic', '#domestic-packages');
+            else if (initialPage === 'international') renderPackages('international', '#international-packages');
+            else if (initialPage === 'honeymoon') renderHoneymoonPackages('#honeymoon-packages');
+            else if (initialPage === 'home') renderTestimonialsFromDB();
         }, 200);
     });
 
