@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Sky Route Global – Budget Tours from Northeast India</title>
+    <!-- All your existing meta tags and styles remain exactly the same -->
+    <!-- ... (keep all your existing head content) ... -->
+    
+    <style>
+        /<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Sky Route Global – Budget Tours from Northeast India</title>
     <!-- PRIMARY META (Boosted SEO) -->
     <meta name="google-site-verification" content="D6YbRgsmlDbnBTIrZJmKD1eIvRR4LSgrg08RFWT42FM" />
     <meta name="description" content="Affordable domestic & international tour packages from Northeast India. Family trips, honeymoon, group tours. Enquire on WhatsApp. Trusted by 500+ travelers.">
@@ -917,7 +927,7 @@
             color: white;
             font-size: 0.9rem;
         }
-        
+        /* Add these spinner styles at the end of your style section */
         .loading-spinner {
             text-align: center;
             padding: 40px;
@@ -939,7 +949,7 @@
             100% { transform: rotate(360deg); }
         }
         
-        .no-packages {
+        .no-packages, .no-testimonials {
             text-align: center;
             padding: 40px;
             grid-column: 1/-1;
@@ -948,7 +958,7 @@
     </style>
 </head>
 <body>
-    <h1 style="display:none">Travel Agency in Guwahati Assam – Domestic & International Tour Packages | Sky Route Global</h1>
+     <h1 style="display:none">Travel Agency in Guwahati Assam – Domestic & International Tour Packages | Sky Route Global</h1>
     
     <!-- NAVBAR -->
     <nav class="navbar">
@@ -1004,8 +1014,10 @@
         </div>
     </div>
 
+    
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script>
     // ===== SUPABASE CONFIGURATION =====
     const SUPABASE_CONFIG = {
@@ -1016,39 +1028,7 @@
     // Initialize Supabase client
     const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
     
-    console.log('Supabase client initialized');
-
-    // ===== TEST DATABASE CONNECTION =====
-    async function testDatabaseConnection() {
-        try {
-            // Test packages table
-            const { data: packages, error: packagesError } = await supabaseClient
-                .from('packages')
-                .select('count', { count: 'exact', head: true });
-            
-            console.log('Packages table test:', packagesError ? '❌ ' + packagesError.message : '✅ Connected');
-            
-            // Test testimonials table
-            const { data: testimonials, error: testimonialsError } = await supabaseClient
-                .from('testimonials')
-                .select('count', { count: 'exact', head: true });
-            
-            console.log('Testimonials table test:', testimonialsError ? '❌ ' + testimonialsError.message : '✅ Connected');
-            
-            // Test settings table
-            const { data: settings, error: settingsError } = await supabaseClient
-                .from('settings')
-                .select('count', { count: 'exact', head: true });
-            
-            console.log('Settings table test:', settingsError ? '❌ ' + settingsError.message : '✅ Connected');
-            
-        } catch (error) {
-            console.error('Database connection test failed:', error);
-        }
-    }
-    
-    // Run connection test
-    testDatabaseConnection();
+    console.log('✅ Supabase client initialized');
 
     // ===== GLOBAL ERROR HANDLER =====
     window.onerror = function(msg, url, lineNo, columnNo, error) {
@@ -1154,30 +1134,19 @@
     // Load packages from database
     async function loadPackagesFromDB() {
         try {
-            console.log('Fetching packages from Supabase...');
+            console.log('📦 Fetching packages...');
             const { data, error } = await supabaseClient
                 .from('packages')
                 .select('*')
                 .order('created_at', { ascending: false });
             
-            if (error) {
-                console.error('Supabase packages error:', error);
-                throw error;
-            }
+            if (error) throw error;
             
-            console.log('Packages loaded:', data?.length || 0, 'packages');
-            
-            // Group packages by category
-            const packagesByCategory = {
-                domestic: data?.filter(p => p.category === 'domestic') || [],
-                international: data?.filter(p => p.category === 'international') || [],
-                honeymoon: data?.filter(p => p.category === 'honeymoon') || []
-            };
-            
-            return packagesByCategory;
+            console.log(`📦 Loaded ${data?.length || 0} packages`);
+            return data || [];
         } catch (error) {
-            console.error('Error loading packages:', error);
-            return null;
+            console.error('❌ Error loading packages:', error);
+            return [];
         }
     }
 
@@ -1185,20 +1154,14 @@
     async function renderPackages(category, containerId) {
         const container = document.getElementById(containerId);
         if (!container) {
-            console.log('Container not found:', containerId);
+            console.log(`Container #${containerId} not found`);
             return;
         }
         
-        console.log(`Rendering ${category} packages in ${containerId}`);
+        const allPackages = await loadPackagesFromDB();
+        const packages = allPackages.filter(p => p.category === category);
         
-        const packagesByCategory = await loadPackagesFromDB();
-        if (!packagesByCategory) {
-            container.innerHTML = '<div class="no-packages">Error loading packages. Please try again.</div>';
-            return;
-        }
-        
-        const packages = packagesByCategory[category] || [];
-        console.log(`${category} packages:`, packages.length);
+        console.log(`📦 Rendering ${packages.length} ${category} packages`);
         
         if (packages.length === 0) {
             container.innerHTML = '<div class="no-packages">No packages available in this category.</div>';
@@ -1211,8 +1174,6 @@
             const features = pkg.features || ['Hotels', 'Transfers', 'Meals', 'Sightseeing'];
             const rating = pkg.rating || 4.5;
             const reviews = pkg.reviews_count || Math.floor(Math.random() * 500) + 100;
-            
-            // Create a safe version of the package name for the onclick
             const safeName = pkg.name.replace(/'/g, "\\'");
             
             html += `
@@ -1242,7 +1203,6 @@
         
         container.innerHTML = html;
         
-        // Re-initialize animations for new cards
         setTimeout(() => {
             initScrollAnimations();
             setupImageErrorHandling();
@@ -1252,21 +1212,12 @@
     // Render honeymoon packages
     async function renderHoneymoonPackages(containerId) {
         const container = document.getElementById(containerId);
-        if (!container) {
-            console.log('Container not found:', containerId);
-            return;
-        }
+        if (!container) return;
         
-        console.log('Rendering honeymoon packages in', containerId);
+        const allPackages = await loadPackagesFromDB();
+        const packages = allPackages.filter(p => p.category === 'honeymoon');
         
-        const packagesByCategory = await loadPackagesFromDB();
-        if (!packagesByCategory) {
-            container.innerHTML = '<div class="no-packages">Error loading packages. Please try again.</div>';
-            return;
-        }
-        
-        const packages = packagesByCategory.honeymoon || [];
-        console.log('Honeymoon packages:', packages.length);
+        console.log(`❤️ Rendering ${packages.length} honeymoon packages`);
         
         if (packages.length === 0) {
             container.innerHTML = '<div class="no-packages">No honeymoon packages available.</div>';
@@ -1308,29 +1259,15 @@
         const phone = prompt('Enter your phone number:');
         if (!phone) return;
         
-        // Store lead in database
         try {
-            const { error } = await supabaseClient.from('leads').insert([
-                {
-                    name,
-                    phone,
-                    package_name: packageName,
-                    source: 'enquire',
-                    message: `Interested in ${packageName} package at ₹${price}`,
-                    status: 'new'
-                }
+            await supabaseClient.from('leads').insert([
+                { name, phone, package_name: packageName, source: 'enquire', status: 'new' }
             ]);
-            
-            if (error) {
-                console.error('Error saving lead:', error);
-            } else {
-                console.log('Lead saved successfully');
-            }
+            console.log('✅ Lead saved');
         } catch (error) {
             console.error('Error saving lead:', error);
         }
         
-        // Open WhatsApp
         const msg = encodeURIComponent(`Hi, I'm interested in ${packageName} package at ₹${price}.\n\nName: ${name}\nPhone: ${phone}`);
         window.open(`https://wa.me/919395319499?text=${msg}`, '_blank');
     }
@@ -1344,26 +1281,20 @@
         }
         
         try {
-            console.log('Fetching testimonials from Supabase...');
+            console.log('⭐ Fetching testimonials...');
             const { data, error } = await supabaseClient
                 .from('testimonials')
                 .select('*')
                 .order('created_at', { ascending: false })
                 .limit(6);
             
-            if (error) {
-                console.error('Supabase testimonials error:', error);
-                throw error;
-            }
+            if (error) throw error;
             
-            const testimonials = data || [];
-            console.log('Testimonials loaded:', testimonials.length);
+            console.log(`⭐ Loaded ${data?.length || 0} testimonials`);
             
-            // Only replace if we have testimonials
-            if (testimonials.length > 0) {
+            if (data && data.length > 0) {
                 let html = '';
-                testimonials.forEach(t => {
-                    const stars = '★'.repeat(t.rating || 5);
+                data.forEach(t => {
                     html += `
                         <div class="testimonial-card">
                             <i class="fas fa-quote-right"></i>
@@ -1377,60 +1308,48 @@
                     `;
                 });
                 container.innerHTML = html;
-                console.log('Testimonials rendered to page');
-            } else {
-                console.log('No testimonials in database, keeping static ones');
+                console.log('⭐ Testimonials rendered to page');
             }
         } catch (error) {
-            console.error('Error loading testimonials:', error);
+            console.error('❌ Error loading testimonials:', error);
         }
     }
 
     // Apply settings from database
     async function applySettingsFromDB() {
         try {
-            console.log('Fetching settings from Supabase...');
+            console.log('⚙️ Fetching settings...');
             const { data, error } = await supabaseClient
                 .from('settings')
                 .select('*');
             
-            if (error) {
-                console.error('Supabase settings error:', error);
-                throw error;
-            }
+            if (error) throw error;
             
             const settings = {};
             data.forEach(item => {
                 settings[item.key] = item.value;
             });
             
-            console.log('Settings loaded:', settings);
+            console.log('⚙️ Settings loaded:', settings);
             
             // Update page title
             if (settings.seo_title) {
                 document.title = settings.seo_title;
-                console.log('Updated title to:', settings.seo_title);
             }
             
             // Update meta description
             if (settings.seo_description) {
                 let metaDesc = document.querySelector('meta[name="description"]');
-                if (metaDesc) {
-                    metaDesc.setAttribute('content', settings.seo_description);
-                    console.log('Updated meta description');
-                }
+                if (metaDesc) metaDesc.setAttribute('content', settings.seo_description);
             }
             
             // Update footer address
-            if (settings.address) {
-                const footerAddress = document.getElementById('footer-address');
-                if (footerAddress) {
-                    footerAddress.innerHTML = `📍 ${settings.address}`;
-                    console.log('Updated footer address');
-                }
+            const footerAddress = document.querySelector('footer p:last-child');
+            if (footerAddress && settings.address) {
+                footerAddress.innerHTML = `📍 ${settings.address}`;
             }
             
-            // Update contact page address if on contact page
+            // Update contact page if visible
             if (window.location.hash === '#contact' || window.location.hash === '') {
                 const contactAddress = document.getElementById('contact-address');
                 if (contactAddress && settings.address) {
@@ -1438,29 +1357,13 @@
                 }
             }
             
-            // Update phone number if present
-            if (settings.phone) {
-                const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
-                phoneLinks.forEach(link => {
-                    const cleanPhone = settings.phone.replace(/\D/g, '');
-                    link.href = `tel:${cleanPhone}`;
-                    if (link.classList.contains('float-btn')) {
-                        // Keep as is
-                    } else if (link.parentElement?.classList.contains('contact-info')) {
-                        link.textContent = settings.phone;
-                    }
-                });
-            }
-            
         } catch (error) {
-            console.error('Error applying settings:', error);
+            console.error('❌ Error applying settings:', error);
         }
     }
 
     // Load packages based on current page
     async function loadPackagesForPage(page) {
-        console.log('Loading packages for page:', page);
-        
         if (page === 'domestic') {
             await renderPackages('domestic', 'domestic-packages');
         } else if (page === 'international') {
@@ -1502,31 +1405,7 @@
                 <section class="testimonials">
                     <h2>Happy Travelers</h2>
                     <div class="testimonial-grid">
-                        <!-- Static testimonials as fallback -->
-                        <div class="testimonial-card">
-                            <i class="fas fa-quote-right"></i>
-                            <p>Sky Route made our Kashmir trip memorable. So affordable!</p>
-                            <div class="customer-row">
-                                <img class="customer-photo" src="https://i.ibb.co/kgfvmCxG/images-4.jpg" alt="Priya" loading="lazy" onerror="handleImageError(this)">
-                                <span class="customer">— Priya, Guwahati</span>
-                            </div>
-                        </div>
-                        <div class="testimonial-card">
-                            <i class="fas fa-quote-right"></i>
-                            <p>Best Dubai deal! Everything was smooth. Thank you team.</p>
-                            <div class="customer-row">
-                                <img class="customer-photo" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop" alt="Rajesh" loading="lazy" onerror="handleImageError(this)">
-                                <span class="customer">— Rajesh, Delhi</span>
-                            </div>
-                        </div>
-                        <div class="testimonial-card">
-                            <i class="fas fa-quote-right"></i>
-                            <p>Group tour to Sikkim was fantastic. 24/7 support helped us.</p>
-                            <div class="customer-row">
-                                <img class="customer-photo" src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1974&auto=format&fit=crop" alt="Anita" loading="lazy" onerror="handleImageError(this)">
-                                <span class="customer">— Anita, Kolkata</span>
-                            </div>
-                        </div>
+                        <!-- Testimonials will be loaded here -->
                     </div>
                 </section>
             </main>
@@ -1538,7 +1417,7 @@
                 <div class="package-grid" id="domestic-packages">
                     <div class="loading-spinner">
                         <div class="spinner"></div>
-                        <p style="margin-top: 10px; color: #64748b;">Loading packages...</p>
+                        <p style="margin-top: 10px;">Loading packages...</p>
                     </div>
                 </div>
             </main>
@@ -1550,7 +1429,7 @@
                 <div class="package-grid" id="international-packages">
                     <div class="loading-spinner">
                         <div class="spinner"></div>
-                        <p style="margin-top: 10px; color: #64748b;">Loading packages...</p>
+                        <p style="margin-top: 10px;">Loading packages...</p>
                     </div>
                 </div>
             </main>
@@ -1566,7 +1445,7 @@
                 <div class="romance-grid" id="honeymoon-packages">
                     <div class="loading-spinner">
                         <div class="spinner"></div>
-                        <p style="margin-top: 10px; color: #64748b;">Loading honeymoon packages...</p>
+                        <p style="margin-top: 10px;">Loading honeymoon packages...</p>
                     </div>
                 </div>
                 
@@ -1583,11 +1462,11 @@
                 <div class="contact-section">
                     <div class="contact-grid">
                         <div class="contact-info">
-                            <p><i class="fas fa-phone-alt"></i> <a href="tel:+919395319499" style="text-decoration:none; color:inherit;" id="contact-phone">+91 93953 19499</a></p>
-                            <p><i class="fab fa-whatsapp"></i> <a href="https://wa.me/919395319499" style="text-decoration:none; color:inherit;" id="contact-whatsapp">+91 93953 19499</a></p>
-                            <p><i class="fas fa-envelope"></i> <span id="contact-email">skyrouteglobal1@gmail.com</span></p>
+                            <p><i class="fas fa-phone-alt"></i> <a href="tel:+919395319499" style="text-decoration:none; color:inherit;">+91 93953 19499</a></p>
+                            <p><i class="fab fa-whatsapp"></i> <a href="https://wa.me/919395319499" style="text-decoration:none; color:inherit;">+91 93953 19499</a></p>
+                            <p><i class="fas fa-envelope"></i> skyrouteglobal1@gmail.com</p>
                             <p><i class="fas fa-map-marker-alt"></i> <span id="contact-address">Jalukbari AEC campus, Ghy 13, Assam</span></p>
-                            <p><i class="fas fa-clock"></i> <span id="contact-hours">Mon-Sat: 9:00 AM - 7:00 PM</span></p>
+                            <p><i class="fas fa-clock"></i> Mon-Sat: 9:00 AM - 7:00 PM</p>
                             <button class="btn" onclick="showPopup()" style="margin-top:20px;"><i class="fas fa-phone"></i> Request Callback</button>
                         </div>
                         <div class="map-container">
@@ -1652,9 +1531,9 @@
             initScrollAnimations();
             loadPackagesForPage(page);
             
-            // Update contact info if on contact page
-            if (page === 'contact') {
-                applySettingsFromDB(); // This will update contact page fields
+            // Load testimonials only on home page
+            if (page === 'home') {
+                renderTestimonialsFromDB();
             }
         }, 100);
     }
@@ -1693,7 +1572,7 @@ Please share package details. Thank you!`;
     document.addEventListener('DOMContentLoaded', async function() {
         console.log('DOM loaded, initializing...');
         
-        // Add click handlers to nav & footer
+        // Add click handlers
         document.querySelectorAll('.nav-link, .footer-links a').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1704,8 +1583,6 @@ Please share package details. Thank you!`;
 
         // Load initial page
         const initialPage = window.location.hash.substring(1) || 'home';
-        console.log('Initial page:', initialPage);
-        
         document.getElementById('page-content').innerHTML = pages[initialPage];
         
         document.querySelectorAll('.nav-link').forEach(link => {
@@ -1718,18 +1595,16 @@ Please share package details. Thank you!`;
         setTimeout(async () => {
             setupImageErrorHandling();
             initScrollAnimations();
-            
-            // Load settings first (affects everything)
             await applySettingsFromDB();
             
-            // Then load testimonials
-            await renderTestimonialsFromDB();
+            if (initialPage === 'home') {
+                await renderTestimonialsFromDB();
+            }
             
-            // Then load packages for current page
             await loadPackagesForPage(initialPage);
             
-            console.log('Initialization complete');
-        }, 100);
+            console.log('✅ Initialization complete');
+        }, 200);
     });
 
     // Make functions globally available
@@ -1740,6 +1615,6 @@ Please share package details. Thank you!`;
     window.handleImageError = handleImageError;
     window.sendContactMessage = sendContactMessage;
     window.enquirePackage = enquirePackage;
-    </script>           
+    </script>
 </body>
 </html>
