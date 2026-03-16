@@ -1003,531 +1003,575 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script>
-    // ===== SUPABASE CONFIGURATION =====
-    const SUPABASE_CONFIG = {
-        url: 'https://pierprjgeypcsvdlojlt.supabase.co',
-        key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpZXJwcmpnZXlwY3N2ZGxvamx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1ODMsImV4cCI6MjA4OTE1NzU4M30.KGz_UBwqWkO8qE4g2mQHy7ktD1ZMFTw2a9uJKuzfjCk'
-    };
+   // ===== SUPABASE CONFIGURATION =====
+const SUPABASE_CONFIG = {
+    url: 'https://pierprjgeypcsvdlojlt.supabase.co',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpZXJwcmpnZXlwY3N2ZGxvamx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1ODMsImV4cCI6MjA4OTE1NzU4M30.KGz_UBwqWkO8qE4g2mQHy7ktD1ZMFTw2a9uJKuzfjCk'
+};
+
+const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+console.log('✅ Supabase client initialized');
+
+// ===== ERROR HANDLER =====
+window.onerror = function(msg, url, lineNo) {
+    console.error('Error caught:', msg, 'at', lineNo);
+    return true;
+};
+
+// ===== WHATSAPP FUNCTIONS =====
+function openWhatsApp(text) {
+    const msg = encodeURIComponent(text);
+    const phone = '919395319499';
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
-    const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
-    console.log('✅ Supabase client initialized');
-
-    // ===== ERROR HANDLER =====
-    window.onerror = function(msg, url, lineNo) {
-        console.error('Error caught:', msg, 'at', lineNo);
-        return true;
-    };
-
-    // ===== WHATSAPP FUNCTIONS =====
-    function openWhatsApp(text) {
-        const msg = encodeURIComponent(text);
-        const phone = '919395319499';
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        
-        try {
-            if (isMobile) {
-                window.location.href = `whatsapp://send?phone=${phone}&text=${msg}`;
-                setTimeout(() => {
-                    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-                }, 500);
-            } else {
-                window.open(`https://web.whatsapp.com/send?phone=${phone}&text=${msg}`, '_blank');
-            }
-        } catch (e) {
-            window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-        }
-        return false;
-    }
-
-    // ===== POPUP FUNCTIONS =====
-    function showPopup() {
-        const popup = document.getElementById('callbackPopup');
-        if (popup) popup.style.display = 'flex';
-    }
-    
-    function hidePopup() {
-        const popup = document.getElementById('callbackPopup');
-        if (popup) popup.style.display = 'none';
-    }
-    
-    function whatsappCallback() {
-        const name = document.getElementById('cbName')?.value || 'Guest';
-        const phone = document.getElementById('cbPhone')?.value || 'not provided';
-        const message = document.getElementById('cbMessage')?.value || 'No message';
-        const msg = encodeURIComponent(`Hi, I need a callback. Name: ${name}, Phone: ${phone}, Message: ${message}`);
-        openWhatsApp(msg);
-        hidePopup();
-    }
-    
-    window.onclick = function(e) {
-        const popup = document.getElementById('callbackPopup');
-        if(popup && e.target === popup) hidePopup();
-    }
-
-    setTimeout(() => {
-        const popup = document.getElementById('callbackPopup');
-        if (popup) showPopup();
-    }, 15000);
-
-    // ===== IMAGE ERROR HANDLING =====
-    function handleImageError(img) {
-        if (img.classList.contains('customer-photo')) {
-            img.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\' viewBox=\'0 0 48 48\'%3E%3Ccircle cx=\'24\' cy=\'24\' r=\'24\' fill=\'%23ff6600\'/%3E%3Ctext x=\'16\' y=\'32\' fill=\'white\' font-size=\'20\'%3E👤%3C/text%3E%3C/svg%3E';
+    try {
+        if (isMobile) {
+            window.location.href = `whatsapp://send?phone=${phone}&text=${msg}`;
+            setTimeout(() => {
+                window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+            }, 500);
         } else {
-            img.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%230a2540\'/%3E%3Ctext x=\'50\' y=\'110\' fill=\'%23ff6600\' font-size=\'24\'%3EImage%3C/text%3E%3C/svg%3E';
+            window.open(`https://web.whatsapp.com/send?phone=${phone}&text=${msg}`, '_blank');
         }
-        img.classList.add('error-fallback');
+    } catch (e) {
+        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
     }
+    return false;
+}
 
-    function setupImageErrorHandling() {
-        document.querySelectorAll('img').forEach(img => {
-            img.removeEventListener('error', function() { handleImageError(this); });
-            img.addEventListener('error', function() { handleImageError(this); });
+// ===== POPUP FUNCTIONS =====
+function showPopup() {
+    const popup = document.getElementById('callbackPopup');
+    if (popup) popup.style.display = 'flex';
+}
+
+function hidePopup() {
+    const popup = document.getElementById('callbackPopup');
+    if (popup) popup.style.display = 'none';
+}
+
+function whatsappCallback() {
+    const name = document.getElementById('cbName')?.value || 'Guest';
+    const phone = document.getElementById('cbPhone')?.value || 'not provided';
+    const message = document.getElementById('cbMessage')?.value || 'No message';
+    const msg = encodeURIComponent(`Hi, I need a callback. Name: ${name}, Phone: ${phone}, Message: ${message}`);
+    openWhatsApp(msg);
+    hidePopup();
+}
+
+window.onclick = function(e) {
+    const popup = document.getElementById('callbackPopup');
+    if(popup && e.target === popup) hidePopup();
+}
+
+setTimeout(() => {
+    const popup = document.getElementById('callbackPopup');
+    if (popup) showPopup();
+}, 15000);
+
+// ===== IMAGE ERROR HANDLING =====
+function handleImageError(img) {
+    if (img.classList.contains('customer-photo')) {
+        img.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\' viewBox=\'0 0 48 48\'%3E%3Ccircle cx=\'24\' cy=\'24\' r=\'24\' fill=\'%23ff6600\'/%3E%3Ctext x=\'16\' y=\'32\' fill=\'white\' font-size=\'20\'%3E👤%3C/text%3E%3C/svg%3E';
+    } else {
+        img.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%230a2540\'/%3E%3Ctext x=\'50\' y=\'110\' fill=\'%23ff6600\' font-size=\'24\'%3EImage%3C/text%3E%3C/svg%3E';
+    }
+    img.classList.add('error-fallback');
+}
+
+function setupImageErrorHandling() {
+    document.querySelectorAll('img').forEach(img => {
+        img.removeEventListener('error', function() { handleImageError(this); });
+        img.addEventListener('error', function() { handleImageError(this); });
+    });
+}
+
+// ===== SCROLL ANIMATIONS =====
+function initScrollAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in-visible');
+                observer.unobserve(entry.target);
+            }
         });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.card, .romance-card, .feature-item, .testimonial-card').forEach(el => {
+        if (el) observer.observe(el);
+    });
+}
+
+// ===== CMS FUNCTIONS =====
+async function loadPackagesFromDB() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('packages')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return data || [];
+    } catch (error) {
+        console.error('Error loading packages:', error);
+        return [];
     }
+}
 
-    // ===== SCROLL ANIMATIONS =====
-    function initScrollAnimations() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in-visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.card, .romance-card, .feature-item, .testimonial-card').forEach(el => {
-            if (el) observer.observe(el);
-        });
+async function renderPackages(category, containerSelector) {
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+    
+    const allPackages = await loadPackagesFromDB();
+    const packages = allPackages.filter(p => p.category === category);
+    
+    if (packages.length === 0) {
+        container.innerHTML = '<div class="no-packages">No packages available in this category.</div>';
+        return;
     }
-
-    // ===== CMS FUNCTIONS =====
-    async function loadPackagesFromDB() {
-        try {
-            const { data, error } = await supabaseClient
-                .from('packages')
-                .select('*')
-                .order('created_at', { ascending: false });
-            if (error) throw error;
-            return data || [];
-        } catch (error) {
-            console.error('Error loading packages:', error);
-            return [];
-        }
-    }
-
-    async function renderPackages(category, containerSelector) {
-        const container = document.querySelector(containerSelector);
-        if (!container) return;
+    
+    let html = '';
+    packages.forEach(pkg => {
+        const highlights = pkg.highlights || ['Beautiful destination', 'Great value', 'Expert guides'];
+        const features = pkg.features || ['Hotels', 'Transfers', 'Meals', 'Sightseeing'];
+        const rating = pkg.rating || 4.5;
+        const reviews = pkg.reviews_count || Math.floor(Math.random() * 500) + 100;
+        const safeName = pkg.name.replace(/'/g, "\\'");
         
-        const allPackages = await loadPackagesFromDB();
-        const packages = allPackages.filter(p => p.category === category);
-        
-        if (packages.length === 0) {
-            container.innerHTML = '<div class="no-packages">No packages available in this category.</div>';
-            return;
-        }
-        
-        let html = '';
-        packages.forEach(pkg => {
-            const highlights = pkg.highlights || ['Beautiful destination', 'Great value', 'Expert guides'];
-            const features = pkg.features || ['Hotels', 'Transfers', 'Meals', 'Sightseeing'];
-            const rating = pkg.rating || 4.5;
-            const reviews = pkg.reviews_count || Math.floor(Math.random() * 500) + 100;
-            const safeName = pkg.name.replace(/'/g, "\\'");
-            
-            html += `
-                <div class="card" tabindex="0">
-                    <img class="card-img" src="${pkg.image || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'180\' viewBox=\'0 0 300 180\'%3E%3Crect width=\'300\' height=\'180\' fill=\'%230a2540\'/%3E%3Ctext x=\'50\' y=\'100\' fill=\'%23ff6600\' font-family=\'Arial\' font-size=\'16\'%3E' + pkg.name + '%3C/text%3E%3C/svg%3E'}" 
-                         alt="${pkg.name}" loading="lazy" onerror="handleImageError(this)">
-                    <div class="card-content">
-                        <div class="card-header">
-                            <h3>${pkg.name}</h3>
-                            <span class="rating"><i class="fas fa-star"></i> ${rating} • ${reviews} reviews</span>
-                        </div>
-                        <div class="duration"><i class="far fa-calendar-alt"></i> ${pkg.duration}</div>
-                        <div class="features-list">
-                            ${features.map(f => `<span><i class="fas fa-check-circle"></i> ${f}</span>`).join('')}
-                        </div>
-                        <ul class="highlights">
-                            ${highlights.slice(0, 3).map(h => `<li><i class="fas fa-check-circle"></i> ${h}</li>`).join('')}
-                        </ul>
-                        <div class="price">₹${pkg.price} <small>per person</small></div>
-                        <a href="#" class="enquire-btn" onclick="enquirePackage('${safeName}', '${pkg.price}'); return false;">
-                            <i class="fab fa-whatsapp"></i> Enquire Now
-                        </a>
-                    </div>
-                </div>
-            `;
-        });
-        
-        container.innerHTML = html;
-        setTimeout(() => {
-            initScrollAnimations();
-            setupImageErrorHandling();
-        }, 100);
-    }
-
-    async function renderHoneymoonPackages(containerSelector) {
-        const container = document.querySelector(containerSelector);
-        if (!container) return;
-        
-        const allPackages = await loadPackagesFromDB();
-        const packages = allPackages.filter(p => p.category === 'honeymoon');
-        
-        if (packages.length === 0) {
-            container.innerHTML = '<div class="no-packages">No honeymoon packages available.</div>';
-            return;
-        }
-        
-        let html = '';
-        packages.forEach(pkg => {
-            const safeName = pkg.name.replace(/'/g, "\\'");
-            html += `
-                <div class="romance-card">
-                    <img class="romance-img" src="${pkg.image || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%230a2540\'/%3E%3Ctext x=\'50\' y=\'110\' fill=\'%23ff6600\' font-size=\'24\'%3E' + pkg.name + '%3C/text%3E%3C/svg%3E'}" 
-                         alt="${pkg.name}" loading="lazy" onerror="handleImageError(this)">
-                    <div class="romance-content">
-                        <div class="heart-icon">❤️</div>
+        html += `
+            <div class="card" tabindex="0">
+                <img class="card-img" src="${pkg.image || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'180\' viewBox=\'0 0 300 180\'%3E%3Crect width=\'300\' height=\'180\' fill=\'%230a2540\'/%3E%3Ctext x=\'50\' y=\'100\' fill=\'%23ff6600\' font-family=\'Arial\' font-size=\'16\'%3E' + pkg.name + '%3C/text%3E%3C/svg%3E'}" 
+                     alt="${pkg.name}" loading="lazy" onerror="handleImageError(this)">
+                <div class="card-content">
+                    <div class="card-header">
                         <h3>${pkg.name}</h3>
-                        <p>${pkg.description || 'Romantic getaway for couples'}</p>
-                        <div class="price">₹${pkg.price} <small>per couple</small></div>
-                        <a href="#" class="btn" onclick="enquirePackage('${safeName}', '${pkg.price}'); return false;"><i class="fab fa-whatsapp"></i> Enquire</a>
+                        <span class="rating"><i class="fas fa-star"></i> ${rating} • ${reviews} reviews</span>
+                    </div>
+                    <div class="duration"><i class="far fa-calendar-alt"></i> ${pkg.duration}</div>
+                    <div class="features-list">
+                        ${features.map(f => `<span><i class="fas fa-check-circle"></i> ${f}</span>`).join('')}
+                    </div>
+                    <ul class="highlights">
+                        ${highlights.slice(0, 3).map(h => `<li><i class="fas fa-check-circle"></i> ${h}</li>`).join('')}
+                    </ul>
+                    <div class="price">₹${pkg.price} <small>per person</small></div>
+                    <a href="#" class="enquire-btn" onclick="enquirePackage('${safeName}', '${pkg.price}'); return false;">
+                        <i class="fab fa-whatsapp"></i> Enquire Now
+                    </a>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    setTimeout(() => {
+        initScrollAnimations();
+        setupImageErrorHandling();
+    }, 100);
+}
+
+async function renderHoneymoonPackages(containerSelector) {
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+    
+    const allPackages = await loadPackagesFromDB();
+    const packages = allPackages.filter(p => p.category === 'honeymoon');
+    
+    if (packages.length === 0) {
+        container.innerHTML = '<div class="no-packages">No honeymoon packages available.</div>';
+        return;
+    }
+    
+    let html = '';
+    packages.forEach(pkg => {
+        const safeName = pkg.name.replace(/'/g, "\\'");
+        html += `
+            <div class="romance-card">
+                <img class="romance-img" src="${pkg.image || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%230a2540\'/%3E%3Ctext x=\'50\' y=\'110\' fill=\'%23ff6600\' font-size=\'24\'%3E' + pkg.name + '%3C/text%3E%3C/svg%3E'}" 
+                     alt="${pkg.name}" loading="lazy" onerror="handleImageError(this)">
+                <div class="romance-content">
+                    <div class="heart-icon">❤️</div>
+                    <h3>${pkg.name}</h3>
+                    <p>${pkg.description || 'Romantic getaway for couples'}</p>
+                    <div class="price">₹${pkg.price} <small>per couple</small></div>
+                    <a href="#" class="btn" onclick="enquirePackage('${safeName}', '${pkg.price}'); return false;"><i class="fab fa-whatsapp"></i> Enquire</a>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    setTimeout(() => {
+        initScrollAnimations();
+        setupImageErrorHandling();
+    }, 100);
+}
+
+async function enquirePackage(packageName, price) {
+    const name = prompt('Enter your name:');
+    if (!name) return;
+    const phone = prompt('Enter your phone number:');
+    if (!phone) return;
+    
+    try {
+        await supabaseClient.from('leads').insert([
+            { name, phone, package_name: packageName, source: 'enquire', status: 'new' }
+        ]);
+    } catch (error) {
+        console.error('Error saving lead:', error);
+    }
+    
+    const msg = encodeURIComponent(`Hi, I'm interested in ${packageName} package at ₹${price}.\n\nName: ${name}\nPhone: ${phone}`);
+    window.open(`https://wa.me/919395319499?text=${msg}`, '_blank');
+}
+
+async function renderTestimonialsFromDB() {
+    const container = document.getElementById('testimonial-grid');
+    if (!container) {
+        console.log('Testimonial container not found');
+        return;
+    }
+    
+    try {
+        console.log('Fetching testimonials from Supabase...');
+        const { data, error } = await supabaseClient
+            .from('testimonials')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(6);
+        
+        if (error) throw error;
+        
+        console.log('Testimonials loaded:', data);
+        
+        if (data && data.length > 0) {
+            let html = '';
+            data.forEach(t => {
+                html += `
+                    <div class="testimonial-card">
+                        <i class="fas fa-quote-right"></i>
+                        <p>${t.review_text}</p>
+                        <div class="customer-row">
+                            <img class="customer-photo" src="${t.customer_photo || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\' viewBox=\'0 0 48 48\'%3E%3Ccircle cx=\'24\' cy=\'24\' r=\'24\' fill=\'%23ff6600\'/%3E%3Ctext x=\'16\' y=\'32\' fill=\'white\' font-size=\'20\'%3E👤%3C/text%3E%3C/svg%3E'}" 
+                                 alt="${t.customer_name}" onerror="handleImageError(this)">
+                            <span class="customer">— ${t.customer_name}${t.destination ? `, ${t.destination}` : ''}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            console.log('Testimonials rendered to page');
+            
+            // Re-initialize animations for new testimonials
+            setTimeout(() => {
+                initScrollAnimations();
+                setupImageErrorHandling();
+            }, 100);
+        } else {
+            console.log('No testimonials in database, showing message');
+            container.innerHTML = '<div class="no-testimonials">No testimonials available yet.</div>';
+        }
+    } catch (error) {
+        console.error('Error loading testimonials:', error);
+        container.innerHTML = '<div class="no-testimonials">Error loading testimonials.</div>';
+    }
+}
+
+async function applySettingsFromDB() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('settings')
+            .select('*');
+        
+        if (error) throw error;
+        
+        const settings = {};
+        data.forEach(item => { settings[item.key] = item.value; });
+        
+        if (settings.seo_title) document.title = settings.seo_title;
+        if (settings.seo_description) {
+            let metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) metaDesc.setAttribute('content', settings.seo_description);
+        }
+        
+        const footerAddress = document.getElementById('footer-address');
+        if (footerAddress && settings.address) {
+            footerAddress.innerHTML = `📍 ${settings.address}`;
+        }
+        
+        // Update hero section if on home page
+        if (window.location.hash === '#home' || window.location.hash === '') {
+            const heroTitle = document.querySelector('.hero-content h1');
+            if (heroTitle && settings.hero_title) {
+                heroTitle.textContent = settings.hero_title;
+            }
+            
+            const heroSubtitle = document.querySelector('.hero-content p');
+            if (heroSubtitle && settings.hero_subtitle) {
+                heroSubtitle.textContent = settings.hero_subtitle;
+            }
+            
+            const trustBadge = document.querySelector('.hero-content p[style*="font-size:14px"]');
+            if (trustBadge && settings.trust_badge_text) {
+                trustBadge.textContent = settings.trust_badge_text;
+            }
+        }
+        
+        // Update contact page if on contact page
+        if (window.location.hash === '#contact') {
+            const contactAddress = document.querySelector('.contact-info p:nth-child(4)');
+            if (contactAddress && settings.address) {
+                contactAddress.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${settings.address}`;
+            }
+            
+            const contactPhone = document.querySelector('.contact-info p:nth-child(1) a');
+            if (contactPhone && settings.phone) {
+                contactPhone.textContent = settings.phone;
+                contactPhone.href = `tel:${settings.phone.replace(/\D/g, '')}`;
+            }
+        }
+    } catch (error) {
+        console.error('Error applying settings:', error);
+    }
+}
+
+// ===== PAGE CONTENT TEMPLATES =====
+const pages = {
+    home: `
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Affordable Domestic & International Tours</h1>
+                    <p>Explore India and the World with Sky Route Global – budget friendly since 2017</p>
+                    <p style="font-size:14px; opacity:0.9; margin-bottom: 20px;">Trusted by 500+ Travelers from worldwide ⭐⭐⭐⭐⭐</p>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <a href="#" class="btn btn-gradient" onclick="openWhatsApp('Hi! I want to plan my trip with Sky Route Global'); return false;"><i class="fab fa-whatsapp"></i> Plan My Trip on WhatsApp</a>
+                        <a href="tel:+919395319499" class="btn btn-outline" style="background:transparent; border:2px solid white; color:white;"><i class="fas fa-phone"></i> Call Now</a>
                     </div>
                 </div>
-            `;
-        });
-        
-        container.innerHTML = html;
-        setTimeout(() => {
-            initScrollAnimations();
-            setupImageErrorHandling();
-        }, 100);
-    }
-
-    async function enquirePackage(packageName, price) {
-        const name = prompt('Enter your name:');
-        if (!name) return;
-        const phone = prompt('Enter your phone number:');
-        if (!phone) return;
-        
-        try {
-            await supabaseClient.from('leads').insert([
-                { name, phone, package_name: packageName, source: 'enquire', status: 'new' }
-            ]);
-        } catch (error) {
-            console.error('Error saving lead:', error);
-        }
-        
-        const msg = encodeURIComponent(`Hi, I'm interested in ${packageName} package at ₹${price}.\n\nName: ${name}\nPhone: ${phone}`);
-        window.open(`https://wa.me/919395319499?text=${msg}`, '_blank');
-    }
-
-    async function renderTestimonialsFromDB() {
-        const container = document.querySelector('.testimonial-grid');
-        if (!container) return;
-        
-        try {
-            const { data, error } = await supabaseClient
-                .from('testimonials')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(6);
-            
-            if (error) throw error;
-            
-            if (data && data.length > 0) {
-                let html = '';
-                data.forEach(t => {
-                    html += `
-                        <div class="testimonial-card">
-                            <i class="fas fa-quote-right"></i>
-                            <p>${t.review_text}</p>
-                            <div class="customer-row">
-                                <img class="customer-photo" src="${t.customer_photo || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\' viewBox=\'0 0 48 48\'%3E%3Ccircle cx=\'24\' cy=\'24\' r=\'24\' fill=\'%23ff6600\'/%3E%3Ctext x=\'16\' y=\'32\' fill=\'white\' font-size=\'20\'%3E👤%3C/text%3E%3C/svg%3E'}" 
-                                     alt="${t.customer_name}" onerror="handleImageError(this)">
-                                <span class="customer">— ${t.customer_name}${t.destination ? `, ${t.destination}` : ''}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            }
-        } catch (error) {
-            console.error('Error loading testimonials:', error);
-        }
-    }
-
-    async function applySettingsFromDB() {
-        try {
-            const { data, error } = await supabaseClient
-                .from('settings')
-                .select('*');
-            
-            if (error) throw error;
-            
-            const settings = {};
-            data.forEach(item => { settings[item.key] = item.value; });
-            
-            if (settings.seo_title) document.title = settings.seo_title;
-            if (settings.seo_description) {
-                let metaDesc = document.querySelector('meta[name="description"]');
-                if (metaDesc) metaDesc.setAttribute('content', settings.seo_description);
-            }
-            
-            const footerAddress = document.getElementById('footer-address');
-            if (footerAddress && settings.address) {
-                footerAddress.innerHTML = `📍 ${settings.address}`;
-            }
-            
-            if (window.location.hash === '#contact' || window.location.hash === '') {
-                const contactAddress = document.querySelector('.contact-info p:nth-child(4)');
-                if (contactAddress && settings.address) {
-                    contactAddress.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${settings.address}`;
-                }
-            }
-        } catch (error) {
-            console.error('Error applying settings:', error);
-        }
-    }
-
-    // ===== PAGE CONTENT TEMPLATES =====
-    const pages = {
-        home: `
-            <section class="hero">
-                <div class="container">
-                    <div class="hero-content">
-                        <h1>Affordable Domestic & International Tours</h1>
-                        <p>Explore India and the World with Sky Route Global – budget friendly since 2017</p>
-                        <p style="font-size:14px; opacity:0.9; margin-bottom: 20px;">Trusted by 500+ Travelers from worldwide ⭐⭐⭐⭐⭐</p>
-                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                            <a href="#" class="btn btn-gradient" onclick="openWhatsApp('Hi! I want to plan my trip with Sky Route Global'); return false;"><i class="fab fa-whatsapp"></i> Plan My Trip on WhatsApp</a>
-                            <a href="tel:+919395319499" class="btn btn-outline" style="background:transparent; border:2px solid white; color:white;"><i class="fas fa-phone"></i> Call Now</a>
-                        </div>
-                    </div>
-                    <div class="hero-image">
-                        <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop" alt="Travel couple with map" loading="eager" fetchpriority="high" onerror="handleImageError(this)">
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop" alt="Travel couple with map" loading="eager" fetchpriority="high" onerror="handleImageError(this)">
+                </div>
+            </div>
+        </section>
+        <main class="container">
+            <section style="margin: 40px 0;">
+                <h2>Why Choose Us</h2>
+                <div class="features-grid">
+                    <div class="feature-item"><i class="fas fa-wallet"></i><h4>Budget Friendly</h4><p>Packages that fit your pocket</p></div>
+                    <div class="feature-item"><i class="fas fa-map"></i><h4>Customizable Tours</h4><p>Tailor your itinerary</p></div>
+                    <div class="feature-item"><i class="fas fa-headset"></i><h4>24/7 Customer Support</h4><p>We're always here</p></div>
+                    <div class="feature-item"><i class="fas fa-handshake"></i><h4>Trusted Partner</h4><p>500+ happy travelers</p></div>
+                </div>
+            </section>
+            <section class="testimonials">
+                <h2>Happy Travelers</h2>
+                <div class="testimonial-grid" id="testimonial-grid">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p style="margin-top: 10px;">Loading testimonials...</p>
                     </div>
                 </div>
             </section>
-            <main class="container">
-                <section style="margin: 40px 0;">
-                    <h2>Why Choose Us</h2>
-                    <div class="features-grid">
-                        <div class="feature-item"><i class="fas fa-wallet"></i><h4>Budget Friendly</h4><p>Packages that fit your pocket</p></div>
-                        <div class="feature-item"><i class="fas fa-map"></i><h4>Customizable Tours</h4><p>Tailor your itinerary</p></div>
-                        <div class="feature-item"><i class="fas fa-headset"></i><h4>24/7 Customer Support</h4><p>We're always here</p></div>
-                        <div class="feature-item"><i class="fas fa-handshake"></i><h4>Trusted Partner</h4><p>500+ happy travelers</p></div>
-                    </div>
-                </section>
-                <section class="testimonials">
-                    <h2>Happy Travelers</h2>
-                    <div class="testimonial-grid">
-                        <!-- Static testimonials as fallback -->
-                        <div class="testimonial-card">
-                            <i class="fas fa-quote-right"></i>
-                            <p>Sky Route made our Kashmir trip memorable. So affordable!</p>
-                            <div class="customer-row">
-                                <img class="customer-photo" src="https://i.ibb.co/kgfvmCxG/images-4.jpg" alt="Priya" loading="lazy" onerror="handleImageError(this)">
-                                <span class="customer">— Priya, Guwahati</span>
-                            </div>
-                        </div>
-                        <div class="testimonial-card">
-                            <i class="fas fa-quote-right"></i>
-                            <p>Best Dubai deal! Everything was smooth. Thank you team.</p>
-                            <div class="customer-row">
-                                <img class="customer-photo" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop" alt="Rajesh" loading="lazy" onerror="handleImageError(this)">
-                                <span class="customer">— Rajesh, Delhi</span>
-                            </div>
-                        </div>
-                        <div class="testimonial-card">
-                            <i class="fas fa-quote-right"></i>
-                            <p>Group tour to Sikkim was fantastic. 24/7 support helped us.</p>
-                            <div class="customer-row">
-                                <img class="customer-photo" src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1974&auto=format&fit=crop" alt="Anita" loading="lazy" onerror="handleImageError(this)">
-                                <span class="customer">— Anita, Kolkata</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </main>
-        `,
-        domestic: `
-            <main class="container">
-                <h2 class="page-title">Domestic Tour Packages</h2>
-                <p style="margin-bottom: 20px;">Explore the beauty of India with our budget-friendly domestic packages from Assam and Delhi.</p>
-                <div class="package-grid" id="domestic-packages">
-                    <div class="loading-spinner">
-                        <div class="spinner"></div>
-                        <p style="margin-top: 10px;">Loading packages...</p>
-                    </div>
+        </main>
+    `,
+    domestic: `
+        <main class="container">
+            <h2 class="page-title">Domestic Tour Packages</h2>
+            <p style="margin-bottom: 20px;">Explore the beauty of India with our budget-friendly domestic packages from Assam and Delhi.</p>
+            <div class="package-grid" id="domestic-packages">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px;">Loading packages...</p>
                 </div>
-            </main>
-        `,
-        international: `
-            <main class="container">
-                <h2 class="page-title">International Tour Packages</h2>
-                <p style="margin-bottom: 20px;">Discover the world with our affordable international packages from India.</p>
-                <div class="package-grid" id="international-packages">
-                    <div class="loading-spinner">
-                        <div class="spinner"></div>
-                        <p style="margin-top: 10px;">Loading packages...</p>
+            </div>
+        </main>
+    `,
+    international: `
+        <main class="container">
+            <h2 class="page-title">International Tour Packages</h2>
+            <p style="margin-bottom: 20px;">Discover the world with our affordable international packages from India.</p>
+            <div class="package-grid" id="international-packages">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px;">Loading packages...</p>
+                </div>
+            </div>
+        </main>
+    `,
+    honeymoon: `
+        <main class="container">
+            <div class="honeymoon-hero">
+                <h2>💕 Honeymoon Special 💕</h2>
+                <p>Romantic escapes customized just for two. Special discounts for newlyweds!</p>
+                <a href="#" class="btn" onclick="openWhatsApp('Hi! I want honeymoon package details'); return false;"><i class="fab fa-whatsapp"></i> Get honeymoon quote</a>
+            </div>
+            <div class="romance-grid" id="honeymoon-packages">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px;">Loading honeymoon packages...</p>
+                </div>
+            </div>
+            <div style="text-align: center; margin: 50px 0; background: #f1f5f9; padding: 40px; border-radius: 40px;">
+                <h3>✨ Honeymoon Add-ons ✨</h3>
+                <p style="margin: 20px 0;">Candlelight dinners • Couple spa • Private photoshoot • Flower bed decoration</p>
+                <a href="#" class="btn btn-outline" onclick="openWhatsApp('Hi, tell me more about honeymoon add-ons'); return false;"><i class="fab fa-whatsapp"></i> Ask about add-ons</a>
+            </div>
+        </main>
+    `,
+    contact: `
+        <main class="container">
+            <h2 class="page-title">Contact Us</h2>
+            <div class="contact-section">
+                <div class="contact-grid">
+                    <div class="contact-info">
+                        <p><i class="fas fa-phone-alt"></i> <a href="tel:+919395319499" style="text-decoration:none; color:inherit;">+91 93953 19499</a></p>
+                        <p><i class="fab fa-whatsapp"></i> <a href="https://wa.me/919395319499" style="text-decoration:none; color:inherit;">+91 93953 19499</a></p>
+                        <p><i class="fas fa-envelope"></i> skyrouteglobal1@gmail.com</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Jalukbari AEC campus, Ghy 13, Assam</p>
+                        <p><i class="fas fa-clock"></i> Mon-Sat: 9:00 AM - 7:00 PM</p>
+                        <button class="btn" onclick="showPopup()" style="margin-top:20px;"><i class="fas fa-phone"></i> Request Callback</button>
                     </div>
-                </div>
-            </main>
-        `,
-        honeymoon: `
-            <main class="container">
-                <div class="honeymoon-hero">
-                    <h2>💕 Honeymoon Special 💕</h2>
-                    <p>Romantic escapes customized just for two. Special discounts for newlyweds!</p>
-                    <a href="#" class="btn" onclick="openWhatsApp('Hi! I want honeymoon package details'); return false;"><i class="fab fa-whatsapp"></i> Get honeymoon quote</a>
-                </div>
-                <div class="romance-grid" id="honeymoon-packages">
-                    <div class="loading-spinner">
-                        <div class="spinner"></div>
-                        <p style="margin-top: 10px;">Loading honeymoon packages...</p>
+                    <div class="map-container">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3581.943752505748!2d91.68154331402953!3d26.14360698346047!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x375a5b7b8b8b8b8b%3A0x8a9a9a9a9a9a9a!2sAEC%20Campus%2C%20Jalukbari%2C%20Guwahati%2C%20Assam!5e0!3m2!1sen!2sin!4v1712345678901!5m2!1sen!2sin" allowfullscreen="" loading="lazy"></iframe>
                     </div>
                 </div>
-                <div style="text-align: center; margin: 50px 0; background: #f1f5f9; padding: 40px; border-radius: 40px;">
-                    <h3>✨ Honeymoon Add-ons ✨</h3>
-                    <p style="margin: 20px 0;">Candlelight dinners • Couple spa • Private photoshoot • Flower bed decoration</p>
-                    <a href="#" class="btn btn-outline" onclick="openWhatsApp('Hi, tell me more about honeymoon add-ons'); return false;"><i class="fab fa-whatsapp"></i> Ask about add-ons</a>
-                </div>
-            </main>
-        `,
-        contact: `
-            <main class="container">
-                <h2 class="page-title">Contact Us</h2>
-                <div class="contact-section">
-                    <div class="contact-grid">
-                        <div class="contact-info">
-                            <p><i class="fas fa-phone-alt"></i> <a href="tel:+919395319499" style="text-decoration:none; color:inherit;">+91 93953 19499</a></p>
-                            <p><i class="fab fa-whatsapp"></i> <a href="https://wa.me/919395319499" style="text-decoration:none; color:inherit;">+91 93953 19499</a></p>
-                            <p><i class="fas fa-envelope"></i> skyrouteglobal1@gmail.com</p>
-                            <p><i class="fas fa-map-marker-alt"></i> Jalukbari AEC campus, Ghy 13, Assam</p>
-                            <p><i class="fas fa-clock"></i> Mon-Sat: 9:00 AM - 7:00 PM</p>
-                            <button class="btn" onclick="showPopup()" style="margin-top:20px;"><i class="fas fa-phone"></i> Request Callback</button>
-                        </div>
-                        <div class="map-container">
-                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3581.943752505748!2d91.68154331402953!3d26.14360698346047!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x375a5b7b8b8b8b8b%3A0x8a9a9a9a9a9a9a!2sAEC%20Campus%2C%20Jalukbari%2C%20Guwahati%2C%20Assam!5e0!3m2!1sen!2sin!4v1712345678901!5m2!1sen!2sin" allowfullscreen="" loading="lazy"></iframe>
-                        </div>
+                <div class="contact-form">
+                    <h3 style="margin-bottom: 20px;">Send us a message</h3>
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" id="contactName">
                     </div>
-                    <div class="contact-form">
-                        <h3 style="margin-bottom: 20px;">Send us a message</h3>
-                        <div class="form-group">
-                            <input type="text" placeholder="Your Name" id="contactName">
-                        </div>
-                        <div class="form-group">
-                            <input type="email" placeholder="Email Address" id="contactEmail">
-                        </div>
-                        <div class="form-group">
-                            <input type="tel" placeholder="Phone Number" id="contactPhone">
-                        </div>
-                        <div class="form-group">
-                            <select id="contactInterest">
-                                <option>Select tour type</option>
-                                <option>Domestic</option>
-                                <option>International</option>
-                                <option>Honeymoon</option>
-                                <option>Group Tour</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <textarea placeholder="Your Message" id="contactMessage"></textarea>
-                        </div>
-                        <button class="btn" onclick="sendContactMessage()"><i class="fab fa-whatsapp"></i> Send via WhatsApp</button>
+                    <div class="form-group">
+                        <input type="email" placeholder="Email Address" id="contactEmail">
                     </div>
+                    <div class="form-group">
+                        <input type="tel" placeholder="Phone Number" id="contactPhone">
+                    </div>
+                    <div class="form-group">
+                        <select id="contactInterest">
+                            <option>Select tour type</option>
+                            <option>Domestic</option>
+                            <option>International</option>
+                            <option>Honeymoon</option>
+                            <option>Group Tour</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Your Message" id="contactMessage"></textarea>
+                    </div>
+                    <button class="btn" onclick="sendContactMessage()"><i class="fab fa-whatsapp"></i> Send via WhatsApp</button>
                 </div>
-                <h2 style="margin-top: 40px;">Frequently Asked Questions</h2>
-                <div class="faq-grid">
-                    <div class="faq-item"><div class="faq-question">✈️ Visa Assistance?</div><div>Yes, we provide end-to-end visa guidance for all international tours.</div></div>
-                    <div class="faq-item"><div class="faq-question">🧳 Can I customize packages?</div><div>Absolutely! Tell us your preferences, we'll tailor the tour.</div></div>
-                    <div class="faq-item"><div class="faq-question">👥 Group discounts?</div><div>Special discounts for groups of 4 or more. Enquire on WhatsApp.</div></div>
-                    <div class="faq-item"><div class="faq-question">💳 Payment options?</div><div>UPI, card, netbanking, and easy EMI available.</div></div>
-                    <div class="faq-item"><div class="faq-question">🏥 Travel insurance?</div><div>Travel insurance is available at nominal cost for all packages.</div></div>
-                </div>
-            </main>
-        `
-    };
+            </div>
+            <h2 style="margin-top: 40px;">Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item"><div class="faq-question">✈️ Visa Assistance?</div><div>Yes, we provide end-to-end visa guidance for all international tours.</div></div>
+                <div class="faq-item"><div class="faq-question">🧳 Can I customize packages?</div><div>Absolutely! Tell us your preferences, we'll tailor the tour.</div></div>
+                <div class="faq-item"><div class="faq-question">👥 Group discounts?</div><div>Special discounts for groups of 4 or more. Enquire on WhatsApp.</div></div>
+                <div class="faq-item"><div class="faq-question">💳 Payment options?</div><div>UPI, card, netbanking, and easy EMI available.</div></div>
+                <div class="faq-item"><div class="faq-question">🏥 Travel insurance?</div><div>Travel insurance is available at nominal cost for all packages.</div></div>
+            </div>
+        </main>
+    `
+};
 
-    // ===== NAVIGATION =====
-    function navigateTo(page) {
-        document.getElementById('page-content').innerHTML = pages[page];
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.toggle('active', link.dataset.page === page);
+// ===== NAVIGATION =====
+function navigateTo(page) {
+    document.getElementById('page-content').innerHTML = pages[page];
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.toggle('active', link.dataset.page === page);
+    });
+    
+    window.location.hash = page;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    setTimeout(() => {
+        setupImageErrorHandling();
+        initScrollAnimations();
+        
+        if (page === 'domestic') renderPackages('domestic', '#domestic-packages');
+        else if (page === 'international') renderPackages('international', '#international-packages');
+        else if (page === 'honeymoon') renderHoneymoonPackages('#honeymoon-packages');
+        else if (page === 'home') {
+            console.log('Home page loaded, rendering testimonials...');
+            renderTestimonialsFromDB();
+        }
+        
+        // Apply settings for the current page
+        applySettingsFromDB();
+    }, 100);
+}
+
+function handleHashChange() {
+    const hash = window.location.hash.substring(1) || 'home';
+    if (pages[hash]) navigateTo(hash);
+}
+
+function sendContactMessage() {
+    const name = document.getElementById('contactName')?.value || 'Guest';
+    const email = document.getElementById('contactEmail')?.value || 'not provided';
+    const phone = document.getElementById('contactPhone')?.value || 'not provided';
+    const interest = document.getElementById('contactInterest')?.value || 'General';
+    const message = document.getElementById('contactMessage')?.value || 'No message';
+    
+    const plainMessage = `Hi Sky Route Global,
+
+I'm interested in a travel package.
+📋 Details:
+• Name: ${name}
+• Email: ${email}
+• Phone: ${phone}
+• Interested in: ${interest}
+• Message: ${message}
+
+Please share package details. Thank you!`;
+    
+    openWhatsApp(plainMessage);
+}
+
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers to nav & footer
+    document.querySelectorAll('.nav-link, .footer-links a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = link.dataset.page;
+            if (page) navigateTo(page);
         });
-        
-        window.location.hash = page;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        setTimeout(() => {
-            setupImageErrorHandling();
-            initScrollAnimations();
-            
-            if (page === 'domestic') renderPackages('domestic', '#domestic-packages');
-            else if (page === 'international') renderPackages('international', '#international-packages');
-            else if (page === 'honeymoon') renderHoneymoonPackages('#honeymoon-packages');
-            else if (page === 'home') renderTestimonialsFromDB();
-        }, 100);
-    }
-
-    function handleHashChange() {
-        const hash = window.location.hash.substring(1) || 'home';
-        if (pages[hash]) navigateTo(hash);
-    }
-
-    function sendContactMessage() {
-        const name = document.getElementById('contactName')?.value || 'Guest';
-        const email = document.getElementById('contactEmail')?.value || 'not provided';
-        const phone = document.getElementById('contactPhone')?.value || 'not provided';
-        const interest = document.getElementById('contactInterest')?.value || 'General';
-        const message = document.getElementById('contactMessage')?.value || 'No message';
-        
-        const plainMessage = `Hi Sky Route Global,\n\nI'm interested in a travel package.\n📋 Details:\n• Name: ${name}\n• Email: ${email}\n• Phone: ${phone}\n• Interested in: ${interest}\n• Message: ${message}\n\nPlease share package details. Thank you!`;
-        openWhatsApp(plainMessage);
-    }
-
-    // ===== INITIALIZATION =====
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.nav-link, .footer-links a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const page = link.dataset.page;
-                if (page) navigateTo(page);
-            });
-        });
-
-        const initialPage = window.location.hash.substring(1) || 'home';
-        document.getElementById('page-content').innerHTML = pages[initialPage];
-        
-        document.querySelectorAll('.nav-link').forEach(link => {
-            if (link.dataset.page === initialPage) link.classList.add('active');
-        });
-        
-        window.addEventListener('hashchange', handleHashChange);
-        
-        setTimeout(async () => {
-            setupImageErrorHandling();
-            initScrollAnimations();
-            await applySettingsFromDB();
-            
-            if (initialPage === 'domestic') renderPackages('domestic', '#domestic-packages');
-            else if (initialPage === 'international') renderPackages('international', '#international-packages');
-            else if (initialPage === 'honeymoon') renderHoneymoonPackages('#honeymoon-packages');
-            else if (initialPage === 'home') renderTestimonialsFromDB();
-        }, 200);
     });
 
-    // Make functions globally available
-    window.openWhatsApp = openWhatsApp;
-    window.showPopup = showPopup;
-    window.hidePopup = hidePopup;
-    window.whatsappCallback = whatsappCallback;
-    window.handleImageError = handleImageError;
-    window.sendContactMessage = sendContactMessage;
-    window.enquirePackage = enquirePackage;
+    // Load initial page
+    const initialPage = window.location.hash.substring(1) || 'home';
+    document.getElementById('page-content').innerHTML = pages[initialPage];
+    
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.dataset.page === initialPage) link.classList.add('active');
+    });
+    
+    window.addEventListener('hashchange', handleHashChange);
+    
+    // Load data after page is rendered
+    setTimeout(async () => {
+        setupImageErrorHandling();
+        initScrollAnimations();
+        await applySettingsFromDB();
+        
+        if (initialPage === 'domestic') renderPackages('domestic', '#domestic-packages');
+        else if (initialPage === 'international') renderPackages('international', '#international-packages');
+        else if (initialPage === 'honeymoon') renderHoneymoonPackages('#honeymoon-packages');
+        else if (initialPage === 'home') {
+            console.log('Initial home page, rendering testimonials...');
+            renderTestimonialsFromDB();
+        }
+    }, 200);
+});
+
+// Make functions globally available
+window.openWhatsApp = openWhatsApp;
+window.showPopup = showPopup;
+window.hidePopup = hidePopup;
+window.whatsappCallback = whatsappCallback;
+window.handleImageError = handleImageError;
+window.sendContactMessage = sendContactMessage;
+window.enquirePackage = enquirePackage;
     </script>
 </body>
 </html>
